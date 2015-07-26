@@ -34,3 +34,7 @@ Sensors are supposed to connect via TCP and send a one-liner JSON message and di
 The JSON message has this format:
 
     {"location":"?","device": "?","temperature":?,"humidity":?}
+
+Only the `location` and `device` fields are kinda required. A Keen.IO event
+will be generated for each of the other values, and the `location` and `device`
+fields are included in each generated event.

@@ -1,6 +1,7 @@
 PORT=5000
 
 Keen = require "keen.io"
+R = require "ramda"
 keenConfig = require "./keen-config"
 
 keenClient = Keen.configure keenConfig
@@ -37,16 +38,20 @@ tryParse = (str) ->
   catch e
     new B.Error { error: e, input: str }
 
-extractEvents = (type, event) ->
-  if event[type]?
-   [{
-      location: (event.location||"kylpyhuone"),
-      device: (event.device||"custom-sensor"),
-      type,
-      value: event[type]
-   }]
-  else
-   []
+extractEvents = (event) ->
+  values = {}
+  properties = {
+    location: "kylpyhuone"
+    device: "custom-sensor"
+  }
+  R.keys(event).forEach (key) ->
+    if key=="location" || key=="device"
+      properties[key]=event[key]
+    else
+      values[key]=event[key]
+  R.keys(values).map (key) ->
+    value = values[key]
+    R.merge(properties)({type: key, value})
 
 temperatureEvents = (event) ->
   extractEvents "temperature", event
@@ -55,7 +60,7 @@ humidityEvents = (event) ->
   extractEvents "humidity", event
 
 toKeenEvents = (event) ->
-  B.fromArray temperatureEvents(event).concat(humidityEvents(event))
+  B.fromArray extractEvents(event)
 
 keenSend = (collection) -> (event) ->
   log "Send to keen", collection, event
