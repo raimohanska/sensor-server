@@ -10,7 +10,7 @@ Install
 
     npm install
 
-Create the file `keep-config.coffee` in this  directory and add your Keen.IO configuration there. Like this:
+Create the file `keen-config.coffee` in this  directory and add your Keen.IO configuration there. Like this:
 
 ```coffeescript
 module.exports = {
