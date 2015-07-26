@@ -1,0 +1,15 @@
+{
+  "name": "sensor-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-script": "^1.9",
+    "baconjs": "^0.7"
+  }
+}
