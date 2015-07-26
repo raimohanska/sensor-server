@@ -1,9 +1,13 @@
+PORT=5000
+
 Keen = require "keen.io"
 keenConfig = require "./keen-config"
 
 keenClient = Keen.configure keenConfig
 
-PORT=5000
+log = (msg...) ->
+  console.log new Date(), msg...
+
 B=require "baconjs"
 B.fromNodeStream = (stream) ->
   B.fromBinder (sink) ->
@@ -18,7 +22,7 @@ B.fromNodeStream = (stream) ->
          stream.removeListener event,listener
 
 server=require("net").createServer().listen(PORT)
-console.log "Listening on port", PORT
+log "Listening on port", PORT
 
 connE = B.fromEvent server, "connection"
 dataE = connE.flatMap (conn) ->
@@ -54,13 +58,13 @@ toKeenEvents = (event) ->
   B.fromArray temperatureEvents(event).concat(humidityEvents(event))
 
 keenSend = (collection) -> (event) ->
-  console.log "Send to keen", collection, event
+  log "Send to keen", collection, event
   if process.env.dont_send
-    console.log "skip send"
+    log "skip send"
   else
     keenClient.addEvent collection, event, (err, res) ->
       if err
-        console.log "Keen error:  " + err
+        log "Keen error:  " + err
 
 dataE
   .flatMap(toKeenEvents)
