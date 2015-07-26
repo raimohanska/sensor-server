@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "coffee-script": "^1.9",
+    "keen.io": "^0.1",
     "baconjs": "^0.7"
   }
 }
