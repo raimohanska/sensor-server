@@ -53,12 +53,6 @@ extractEvents = (event) ->
     value = values[key]
     R.merge(properties)({type: key, value})
 
-temperatureEvents = (event) ->
-  extractEvents "temperature", event
-
-humidityEvents = (event) ->
-  extractEvents "humidity", event
-
 toKeenEvents = (event) ->
   B.fromArray extractEvents(event)
 
