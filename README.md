@@ -1,6 +1,8 @@
 ## sensor-server
 
-Sends data from local sensors to Keen.io
+Local proxy server for collecting sensor events and sending them
+to Keen.io. The local proxy is needed because at least my sensors
+don't have SSL/TLS capabilities.
 
 ### Install
 
