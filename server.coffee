@@ -67,5 +67,6 @@ keenSend = (collection) -> (event) ->
         log "Keen error:  " + err
 
 dataE
+  .doAction(log, "Received")
   .flatMap(toKeenEvents)
   .onValue(keenSend "sensors")
