@@ -1,4 +1,4 @@
-PORT=5000
+PORT=parseInt(process.env.PORT||5000)
 
 Keen = require "keen.io"
 R = require "ramda"
@@ -67,5 +67,6 @@ keenSend = (collection) -> (event) ->
 
 dataE
   .doAction(log, "Received")
+  .doError(log, "Error") 
   .flatMap(toKeenEvents)
   .onValue(keenSend "sensors")
