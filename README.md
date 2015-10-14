@@ -21,13 +21,25 @@ module.exports = {
 
 ### Run
 
-    coffee server.coffee
+Run normally
 
-### Test it without actually sending
+    npm run serve
 
-    dont_send=true coffee server.coffee
+Run, restart on file changes
 
-### Sensor protocol
+    npm run watch
+
+Test it without actually sending to Keen
+
+    dont_send=true npm run watch
+
+### HTTP POST Sensor Protocol
+
+Send sensor events using HTTP POST. Try this:
+
+    curl -H "Content-Type: application/json" -X POST -d '{"type": "temperature", "location": "bedroom", "value": 100}' http://localhost:5080/event
+
+### Simple TCP Sensor protocol
 
 Sensors are supposed to connect via TCP and send a one-liner JSON message and disconnect.
 

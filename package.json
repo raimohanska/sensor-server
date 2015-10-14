@@ -4,14 +4,21 @@
   "description": "",
   "main": "server.coffee",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "coffee server.coffee",
+    "watch": "node_modules/nodemon/bin/nodemon.js -e js,html,coffee,css,less --ignore 'dist/*' --exec 'npm run serve'"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "baconjs": "^0.7.75",
+    "body-parser": "^1.14.1",
     "coffee-script": "^1.9",
+    "express": "^4.10.2",
     "keen.io": "^0.1",
     "ramda": "^0.13",
-    "baconjs": "^0.7"
+    "socket.io": "^1.3.6"
+  },
+  "devDependencies": {
+    "nodemon": "^1"
   }
 }
