@@ -1,32 +1,28 @@
 config = (require "./config").influx
 log = require "./log"
+R=require "ramda"
 
 if config
-  influent = require "influent"
-  R=require "ramda"
+  client = (require "influx")(config)
 
-  createClient = influent.createClient config
   log "Connecting to InfluxDB"
-    
-  createClient.then (client) ->
-    log "Connected to InfluxDB"
 
+    
   store = (event) ->
-    createClient
-      .then (client) ->
-        influxEvent =
-          key: event.type
-          tags: R.fromPairs(R.toPairs(event).filter(([key, value]) -> !R.contains(key)(["type", "value", "timestamp"])))
-          fields: {
-            value: event.value
-          }
-        if event.timestamp
-          influxEvent.timestamp = new Date(event.timestamp).getTime()
-        log "storing to InfluxDB", influxEvent
-        client.writeOne influxEvent
-      .then -> log "stored event to InfluxDB"
-      .catch (e) -> 
-        log "ERROR: " + e.stack.split("\n")
+    influxEvent =
+      key: event.type
+      tags: R.fromPairs(R.toPairs(event).filter(([key, value]) -> !R.contains(key)(["type", "value", "timestamp"])))
+      fields: {
+        value: event.value
+      }
+
+    if event.timestamp
+      influxEvent.fields.time = new Date(event.timestamp)
+
+    log "storing to InfluxDB", influxEvent
+    client.writePoint influxEvent.key, influxEvent.fields, influxEvent.tags, (err, response) ->
+      if (err)
+        log "ERROR: " + err.stack.split("\n")
 
   module.exports = { store }
 else

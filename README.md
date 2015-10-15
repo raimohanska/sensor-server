@@ -21,10 +21,9 @@ module.exports = {
     database: "mydb"
     username: ""
     password: ""
-    server:
-      protocol: "http"
-      host: "localhost"
-      port: 8086
+    protocol: "http"
+    host: "localhost"
+    port: 8086
 }
 ```
 
