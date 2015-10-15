@@ -1,10 +1,10 @@
 ## sensor-server
 
-Local proxy server for collecting sensor events and sending them
-to Keen.io. The local proxy is needed because at least my sensors
-don't have SSL/TLS capabilities.
+Server for collecting events from home automation sensors.
 
-### Install
+Currently just proxies the data Keen.io, but maybe some day stores events to its own database and serves metrics and graphs.
+
+## Install
 
 Install
 
@@ -19,9 +19,7 @@ module.exports = {
 }
 ```
 
-### Run
-
-Run normally
+Then run:
 
     npm run serve
 
@@ -33,9 +31,27 @@ Test it without actually sending to Keen
 
     dont_send=true npm run watch
 
+## Event collection
+
+Sensor events are collected using a couple of protocols.
+
 ### HTTP POST Sensor Protocol
 
-Send sensor events using HTTP POST. Try this:
+Server accepts incoming events as HTTP POST requests to the `/event` path on HTTP port 5080.
+
+Event documents look like this:
+
+```json
+{
+    "type": "temperature", 
+    "location": "bedroom", 
+    "value": 100
+}
+```
+
+The `value` field is required. In addition, there must be at least one other field for identifying the events source. My convention is to use `type` for describing what kind of data is transmitted and `location` for identifying the location of the sensor.
+
+Try this:
 
     curl -H "Content-Type: application/json" -X POST -d '{"type": "temperature", "location": "bedroom", "value": 100}' http://localhost:5080/event
 
