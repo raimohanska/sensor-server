@@ -13,14 +13,17 @@ if config
 
   store = (event) ->
     createClient
-      .then (client) -> 
-        log "storing to InfluxDB"
-        client.writeOne(
+      .then (client) ->
+        influxEvent =
           key: event.type
-          tags: R.fromPairs(R.toPairs(event).filter(([key, value]) -> !R.contains(key)(["type", "value"])))
+          tags: R.fromPairs(R.toPairs(event).filter(([key, value]) -> !R.contains(key)(["type", "value", "timestamp"])))
           fields: {
             value: event.value
-          })
+          }
+        if event.timestamp
+          influxEvent.timestamp = new Date(event.timestamp).getTime()
+        log "storing to InfluxDB", influxEvent
+        client.writeOne influxEvent
       .then -> log "stored event to InfluxDB"
       .catch (e) -> 
         log "ERROR: " + e.stack.split("\n")

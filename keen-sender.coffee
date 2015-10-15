@@ -1,6 +1,7 @@
 Keen = require "keen.io"
 config = (require "./config").keen
 log = require "./log"
+R = require "ramda"
 
 if config
   keenClient = Keen.configure config
@@ -8,6 +9,10 @@ if config
   log "Keen.IO client configured"
 
   send = (event) ->
+    event = R.clone(event)
+    if event.timestamp
+      event.keen = { timestamp: event.timestamp }
+      delete event.timestamp
     collection = (event.collection||"sensors")
     delete event.collection
 
