@@ -13,6 +13,7 @@
     "baconjs": "^0.7.75",
     "body-parser": "^1.14.1",
     "coffee-script": "^1.9",
+    "es6-promise": "^3.0.2",
     "express": "^4.10.2",
     "influent": "^0.4.2",
     "keen.io": "^0.1",

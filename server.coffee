@@ -1,3 +1,4 @@
+require('es6-promise').polyfill()
 R = require "ramda"
 TcpSimple = require "./tcp-simple-protocol"
 log = require "./log"
