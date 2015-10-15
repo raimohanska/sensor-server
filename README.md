@@ -2,7 +2,7 @@
 
 Server for collecting events from home automation sensors.
 
-Currently just proxies the data Keen.io, but maybe some day stores events to its own database and serves metrics and graphs.
+Supports sending data over to Keen.IO and storing it into a local InfluxDB database.
 
 ## Install
 
@@ -10,14 +10,25 @@ Install
 
     npm install
 
-Create the file `keen-config.coffee` in this  directory and add your Keen.IO configuration there. Like this:
+Create the file `config.coffee` in this  directory and add your Keen.IO and InfluxDB configuration there. Like this:
 
 ```coffeescript
 module.exports = {
-  projectId: "YOURPROJECTIT"
-  writeKey: "YOURWRITEKEY"
+  keen:
+    projectId: "YOURPROJECTIT"
+    writeKey: "YOURWRITEKEY"
+  influx:
+    database: "mydb"
+    username: ""
+    password: ""
+    server:
+      protocol: "http"
+      host: "localhost"
+      port: 8086
 }
 ```
+
+You can omit either of the `keen` and `influx` sections if you don't need one of them.
 
 Then run:
 

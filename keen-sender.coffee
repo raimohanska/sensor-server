@@ -1,18 +1,24 @@
 Keen = require "keen.io"
-keenConfig = require "./keen-config"
-keenClient = Keen.configure keenConfig
+config = (require "./config").keen
 log = require "./log"
 
-send = (event) ->
-  collection = (event.collection||"sensors")
-  delete event.collection
+if config
+  keenClient = Keen.configure config
+  log = require "./log"
+  log "Keen.IO client configured"
 
-  log "Send to keen", collection, event
-  if process.env.dont_send
-    log "skip send"
-  else
-    keenClient.addEvent collection, event, (err, res) ->
-      if err
-        log "Keen error:  " + err
+  send = (event) ->
+    collection = (event.collection||"sensors")
+    delete event.collection
 
-module.exports = { send }
+    log "Send to keen", collection, event
+    if process.env.dont_send
+      log "skip send"
+    else
+      keenClient.addEvent collection, event, (err, res) ->
+        if err
+          log "Keen error:  " + err
+
+  module.exports = { send }
+else
+  module.exports = { send: -> }

@@ -4,6 +4,7 @@ log = require "./log"
 B=require "baconjs"
 KeenSender = require "./keen-sender"
 HttpServer = require "./http-server"
+Influx = require "./influx-store"
 validate = require "./validate"
 
 sensorEvents = TcpSimple.sensorEvents.merge(HttpServer.sensorEvents)
@@ -11,6 +12,9 @@ sensorEvents = TcpSimple.sensorEvents.merge(HttpServer.sensorEvents)
 
 sensorEvents
   .onValue(KeenSender.send)
+
+sensorEvents
+  .onValue(Influx.store)
 
 sensorEvents
   .onError (error) -> log("ERROR: " + error)
