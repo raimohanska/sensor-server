@@ -11,7 +11,9 @@ log "TCP simple protocol server listening on port", PORT
 connE = B.fromEvent server, "connection"
 dataE = connE.flatMap (conn) ->
   B.fromNodeStream(conn)
-    .map(".toString")
+    .map((x) -> x.toString().split(""))
+    .flatMap(B.fromArray)
+    .takeWhile((x) -> x != "\n")
     .fold("", (a, b) -> a + b)
     .flatMap(tryParse)
 
