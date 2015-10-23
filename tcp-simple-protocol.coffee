@@ -16,6 +16,7 @@ dataE = connE.flatMap (conn) ->
     .takeWhile((x) -> x != "\n")
     .fold("", (a, b) -> a + b)
     .flatMap(tryParse)
+    .doEnd(-> conn.destroy())
 
 tryParse = (str) ->
   try
