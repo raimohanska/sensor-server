@@ -27,7 +27,6 @@ tryParse = (str) ->
 extractEvents = (event) ->
   values = {}
   properties = {
-    location: "kylpyhuone"
     device: "custom-sensor"
     collection: "sensors"
   }

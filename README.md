@@ -24,10 +24,13 @@ module.exports = {
     protocol: "http"
     host: "localhost"
     port: 8086
+  propertyMapping: [
+    { match: { device: "device1" }, properties: { location: "livingroom" }}
+  ]
 }
 ```
 
-You can omit either of the `keen` and `influx` sections if you don't need one of them.
+You can omit any of the `keen`, `influx` and `propertyMapping` sections if you don't need one of them.
 
 Then run:
 
@@ -40,6 +43,12 @@ Run, restart on file changes
 Test it without actually sending to Keen
 
     dont_send=true npm run watch
+
+## Property Mapping
+
+The `propertyMapping` section in the configuration file is used to match incoming events and add some extra tags. For instance,
+you may use this to recognize a device and add a `location` field for that device. I use this to assign `location` value for my 
+several sensors. I use room names as `location` values.
 
 ## Event collection
 

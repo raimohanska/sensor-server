@@ -7,9 +7,11 @@ KeenSender = require "./keen-sender"
 HttpServer = require "./http-server"
 Influx = require "./influx-store"
 validate = require "./validate"
+mapProperties = require "./property-mapping"
 
 sensorEvents = TcpSimple.sensorEvents.merge(HttpServer.sensorEvents)
   .flatMap(validate)
+  .map(mapProperties)
 
 sensorEvents
   .onValue(KeenSender.send)
