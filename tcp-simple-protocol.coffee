@@ -29,6 +29,7 @@ extractEvents = (event) ->
   properties = {
     device: "custom-sensor"
     collection: "sensors"
+    sensor: "0"
   }
   R.keys(event).forEach (key) ->
     if R.contains(key)(R.keys(properties))
