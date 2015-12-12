@@ -12,7 +12,12 @@ jsonParser = bodyParser.json()
 sensorEvents = Bacon.Bus()
 
 app.post "/event", jsonParser, (req, res) ->
-  sensorEvents.push(req.body)
+  events = if req.body instanceof Array
+    req.body
+  else
+    [req.body]
+  events.forEach (event) ->
+    sensorEvents.push(event)
   res.send("ok")
 
 http.listen port, ->
