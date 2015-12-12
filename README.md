@@ -74,7 +74,9 @@ Try this:
 
     curl -H "Content-Type: application/json" -X POST -d '{"type": "temperature", "location": "bedroom", "value": 100}' http://localhost:5080/event
 
-### Simple TCP Sensor protocol
+An array of events is accepted too, so that multiple events can be included in a single POST.
+
+### Simple TCP Sensor protocol (deprecated)
 
 Sensors are supposed to connect via TCP and send a one-liner JSON message and disconnect.
 
