@@ -9,10 +9,9 @@ Influx = require "./influx-store"
 validate = require "./validate"
 mapProperties = require "./property-mapping"
 config = require "./config"
+sensors = require "./sensors"
 
-sensorE = HttpServer.sensorE
-  .flatMap(validate)
-  .map(mapProperties)
+sensorE = sensors.sensorE
 
 sensorE
   .onValue(KeenSender.send)
@@ -27,8 +26,10 @@ if config.init
   mods = {
     time: require("./time"),
     sun: require("./sun"),
-    sensors: { sensorE },
-    log
+    sensors,
+    log,
+    R,
+    B
   }
 
   if config.houm
