@@ -2,6 +2,7 @@
 require('es6-promise').polyfill()
 R = require "ramda"
 log = require "./log"
+log "Starting"
 B=require "baconjs"
 KeenSender = require "./keen-sender"
 HttpServer = require "./http-server"
