@@ -23,12 +23,22 @@ houmConnectE.onValue =>
 houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).map(true)).toProperty()
 houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
 
-setLight = ({id, name}, bri) ->
-  log "Set", name, "brightness to",  bri
-  houmSocket.emit('apply/light', {_id: id, on: bri>0, bri })
+setLight = (name) -> (bri) ->
+  houmLightsP.take(1).forEach (lights) ->
+    light = findLight name, lights
+    lightOn = bri
+    if typeof bri == "number"
+      lightOn = bri>0
+    else
+      bri = if lightOn then 255 else 0
+    log "Set", name, "bri="+bri, "on="+lightOn
+    if light
+      houmSocket.emit('apply/light', {_id: light.id, on: lightOn, bri })
+    else
+      log "ERROR: light", name, " not found"
 
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
 findLight = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
 
-module.exports = { houmReadyP, setLight, findLight, quadraticBrightness, houmLightsP }
+module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP }
