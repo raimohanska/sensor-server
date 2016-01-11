@@ -1,3 +1,4 @@
+#!/usr/bin/env coffee
 require('es6-promise').polyfill()
 R = require "ramda"
 log = require "./log"
@@ -7,16 +8,30 @@ HttpServer = require "./http-server"
 Influx = require "./influx-store"
 validate = require "./validate"
 mapProperties = require "./property-mapping"
+config = require "./config"
 
-sensorEvents = HttpServer.sensorEvents
+sensorE = HttpServer.sensorE
   .flatMap(validate)
   .map(mapProperties)
 
-sensorEvents
+sensorE
   .onValue(KeenSender.send)
 
-sensorEvents
+sensorE
   .onValue(Influx.store)
 
-sensorEvents
+sensorE
   .onError (error) -> log("ERROR: " + error)
+
+if config.init
+  mods = {
+    time: require("./time"),
+    sun: require("./sun"),
+    sensors: { sensorE },
+    log
+  }
+
+  if config.houm
+    mods.houm = require "./houm"
+
+  config.init mods

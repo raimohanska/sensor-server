@@ -9,7 +9,7 @@ port = process.env.PORT || 5080
 
 jsonParser = bodyParser.json()
 
-sensorEvents = Bacon.Bus()
+sensorE = Bacon.Bus()
 
 app.post "/event", jsonParser, (req, res) ->
   events = if req.body instanceof Array
@@ -17,12 +17,12 @@ app.post "/event", jsonParser, (req, res) ->
   else
     [req.body]
   events.forEach (event) ->
-    sensorEvents.push(event)
+    sensorE.push(event)
   res.send("ok")
 
 http.listen port, ->
   log "HTTP listening on port", port
 
-sensorEvents.log("HTTP sensor event")
+sensorE.log("HTTP sensor event")
 
-module.exports = { sensorEvents }
+module.exports = { sensorE }
