@@ -4,7 +4,7 @@ B.Observable :: repeatBy = (keyF, interval) ->
   src = this
   src.flatMap (event) ->
     key = keyF(event)
-    B.interval(interval, event).takeUntil(src.filter((e) -> keyF(e) == key))
+    B.once(event).concat(B.interval(interval, event).takeUntil(src.filter((e) -> keyF(e) == key)))
 
 B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
   this
