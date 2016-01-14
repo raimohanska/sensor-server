@@ -6,19 +6,16 @@ validate = require "./validate"
 mapProperties = require "./property-mapping"
 config = require "./config"
 
-sensorE = HttpServer.sensorE
+eventBus = B.Bus()
+
+sensorE = eventBus.merge(HttpServer.sensorE)
   .flatMap(validate)
   .map(mapProperties)
 
+pushEvent = eventBus.push.bind(eventBus)
+
+sensorE.log("storing")
+
 sensorP = (props) -> sensorE.filter(R.whereEq props).map(".value").toProperty()
 
-B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
-  this
-    .scan false, (prev, val) ->
-      if prev
-        val < highLimit
-      else
-        val < lowLimit
-    .skipDuplicates()
-
-module.exports = { sensorE, sensorP }
+module.exports = { sensorE, sensorP, pushEvent }

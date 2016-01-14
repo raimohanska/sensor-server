@@ -6,7 +6,6 @@ if config
   client = (require "influx")(config)
 
   log "Connecting to InfluxDB"
-
     
   store = (event) ->
     influxEvent =

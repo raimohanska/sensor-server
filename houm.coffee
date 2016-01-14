@@ -13,7 +13,7 @@ houmConfig = require('./config').houm
 houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
   .map(JSON.parse)
   .map(".lights")
-  .map((lights) => lights.map(({name,_id})=>{name,id:_id}))
+  .map((lights) => lights.map(({name,room,_id})=>{name,room,id:_id}))
   .toProperty()
 houmLightsP
   .forEach log, "HOUM lights found"
@@ -23,9 +23,17 @@ houmConnectE.onValue =>
 houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).map(true)).toProperty()
 houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
 
+lightE= B.fromEvent(houmSocket, 'setLightState')
+lightStateE = lightE 
+  .combine houmLightsP, ({_id, bri}, lights) ->
+    light = findById _id, lights
+    { lightId: light.id, room: light.room, light: light.name, type:"brightness", value:bri }
+  .sampledBy(lightE)
+  .log("lightState")
+
 setLight = (name) -> (bri) ->
   houmLightsP.take(1).forEach (lights) ->
-    light = findLight name, lights
+    light = findByName name, lights
     lightOn = bri
     if typeof bri == "number"
       lightOn = bri>0
@@ -39,6 +47,7 @@ setLight = (name) -> (bri) ->
 
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
-findLight = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
+findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
+findById = (id, lights) -> R.find(((light) -> light.id == id), lights)
 
-module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP }
+module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE }
