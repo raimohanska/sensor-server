@@ -29,7 +29,6 @@ lightStateE = lightE
     light = findById _id, lights
     { lightId: light.id, room: light.room, light: light.name, type:"brightness", value:bri }
   .sampledBy(lightE)
-  .log("lightState")
 
 setLight = (name) -> (bri) ->
   houmLightsP.take(1).forEach (lights) ->
