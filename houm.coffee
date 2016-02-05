@@ -24,11 +24,38 @@ houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).ma
 houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
 
 lightE= B.fromEvent(houmSocket, 'setLightState')
-lightStateE = lightE 
+lightStateE = lightE
   .combine houmLightsP, ({_id, bri}, lights) ->
     light = findById _id, lights
     { lightId: light.id, room: light.room, light: light.name, type:"brightness", value:bri }
   .sampledBy(lightE)
+
+fullLightStateP = lightStateE.scan {}, (state, light) ->
+  state = R.clone(state)
+  state[light.lightId]=light
+  state
+
+lightStateP = (query) ->
+  lightStateE
+    .filter(matchLight(query))
+    .toProperty()
+
+totalBrightnessP = (query) ->
+  fullLightStateP
+    .log()
+    .map(filterLightState(query))
+    .map (state) -> R.sum(R.values(state).map((light) -> light.value))
+
+filterLightState = (query) -> (fullLightState) ->
+  R.indexBy(R.prop("lightId"), R.values(fullLightState).filter(matchLight(query)))
+
+matchLight = (query) -> (light) ->
+  if not query instanceof Array
+    query = [query]
+  matchSingle = (q) ->
+    log "matching", q, light
+    light.lightId == q || light.light.toLowerCase() == q.toLowerCase() || light.room.toLowerCase() == q.toLowerCase()
+  R.any matchSingle query
 
 setLight = (name) -> (bri) ->
   houmLightsP.take(1).forEach (lights) ->
@@ -48,5 +75,6 @@ quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
 findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
 findById = (id, lights) -> R.find(((light) -> light.id == id), lights)
+findByQuery = (query, lights) -> R.filter(matchLight(query), lights)
 
-module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE }
+module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }

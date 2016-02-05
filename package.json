@@ -17,7 +17,7 @@
     "express": "^4.10.2",
     "influx": "git://github.com/node-influx/node-influx",
     "keen.io": "^0.1",
-    "ramda": "^0.18",
+    "ramda": "^0.19",
     "moment": "^2.11.0",
     "request-promise": "^1.0.2",
     "socket.io-client": "^1.2.1",
