@@ -2,6 +2,7 @@
 "use strict"
 B = require('baconjs')
 R = require('ramda')
+time = require "./time"
 moment = require 'moment'
 io = require('socket.io-client')
 log = (msg...) -> console.log new Date().toString(), msg...
@@ -31,10 +32,17 @@ lightStateE = lightE
     { lightId: light.lightId, room: light.room, light: light.light, type:"brightness", value:bri }
   .sampledBy(lightE)
 
-fullLightStateP = lightStateE.scan {}, (state, light) ->
-  state = R.clone(state)
-  state[light.lightId]=light
-  state
+fullLightStateP = lightStateE
+  .scan {}, (state, light) ->
+    state = R.clone(state)
+    state[light.lightId]=light
+    state
+  .combine houmLightsP, (state, allLights) ->
+    state = R.clone(state)
+    allLights.forEach (light) ->
+      if !state[light.lightId]
+        state[light.lightId] = light
+    state
 
 lightStateP = (query) ->
   lightStateE
@@ -50,12 +58,11 @@ filterLightState = (query) -> (fullLightState) ->
   R.indexBy(R.prop("lightId"), R.values(fullLightState).filter(matchLight(query)))
 
 matchLight = (query) -> (light) ->
-  if not query instanceof Array
+  if !(query instanceof Array)
     query = [query]
   matchSingle = (q) ->
-    #log "matching", q, light
-    light.lightId == q || light.light.toLowerCase() == q.toLowerCase() || light.room.toLowerCase() == q.toLowerCase()
-  R.any matchSingle query
+    (light.lightId == q) || (light.light.toLowerCase() == q.toLowerCase()) || (light.room.toLowerCase() == q.toLowerCase())
+  R.any matchSingle, query
 
 setLight = (query) -> (bri) ->
   houmLightsP.take(1).forEach (lights) ->
@@ -72,10 +79,31 @@ setLight = (query) -> (bri) ->
     else
       log "ERROR: light", query, " not found"
 
+fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
+  fullLightStateP.take(1).forEach (lights) ->
+    lights = findByQuery query, R.values(lights)
+    if lights.length > 0
+      lights.forEach (light) ->
+        if !light.value
+          setLight(light.lightId)(bri)
+        else
+          distance = Math.abs(bri - light.value)
+          steps = 100
+          stepSize = distance / steps
+          stepDuration = duration / stepSize
+          if stepDuration < 100
+            stepDuration = 100
+            stepSize = distance * duration / stepDuration
+          B.fade(light.value, bri, stepDuration, stepSize)
+            .forEach (nextBri) -> # TODO: abort on external event
+              setLight(light.lightId)(nextBri)
+    else
+      log "ERROR: light", query, " not found"
+
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
 findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
 findById = (id, lights) -> R.find(((light) -> light.lightId == id), lights)
 findByQuery = (query, lights) -> R.filter(matchLight(query), lights)
 
-module.exports = { houmReadyE, houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }
+module.exports = { houmReadyE, houmReadyP, fadeLight, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }

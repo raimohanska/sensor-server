@@ -26,23 +26,27 @@ B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
         val < lowLimit
     .skipDuplicates()
 
+B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
+  diff = (to - from) / fadeStep
+  steps = Math.floor(Math.abs(diff))
+  if from == undefined or steps == 0
+    log "set to", to
+    B.once(to)
+  else
+    log "fade from", from, "to", to, "in", steps, " steps"
+    B.range(0, steps, fadeStepTime)
+      .map (step) ->
+        scale(step + 1, 0, steps, from, to)
+      .concat(B.once(to))
+
 B.Property :: smooth = (fadeStepTime = 100, fadeStep = 0.1) ->
   src = this
   value = undefined
   src
     .flatMapLatest (newValue) ->
-      startValue = value
-      diff = (newValue - startValue) / fadeStep
-      steps = Math.floor(Math.abs(diff))
-      if value == undefined or steps == 0
-        value = newValue
-        B.once(value)
-      else
-        #log "smoothing", value, newValue, "in", steps
-        B.range(0, steps, fadeStepTime)
-          .map (step) ->
-            value = scale(step + 1, 0, steps, startValue, newValue)
-            value
-          .concat(B.once(newValue))
+      B.fade(value, newValue, fadeStepTime, fadeStep)
+        .map (newValue) ->
+          value = newValue
+          value
     .toProperty()
     .skipDuplicates()
