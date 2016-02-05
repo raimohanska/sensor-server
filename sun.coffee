@@ -5,6 +5,7 @@ moment=require "moment"
 rp = require 'request-promise'
 config =  require "./config"
 time = require "./time"
+scale = require "./scale"
 
 parseTime = (str) -> 
   moment(str + " +0000", "h:mm:ss A Z")
@@ -42,14 +43,6 @@ sunBrightnessP = B.combineAsArray(sunLightInfoP, time.eachSecondE)
       LIGHT
   .map(Math.floor)
   .skipDuplicates()
-
-scale = (value, inMin, inMax, outMin, outMax) ->
-  if value < inMin
-    outMin
-  else if value > inMax
-    outMax
-  else
-    outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin)
 
 #sunBrightnessP.log()
 
