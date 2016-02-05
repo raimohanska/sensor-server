@@ -2,7 +2,7 @@ time = require "./time"
 B = require "baconjs"
 sensors = require "./sensors"
 
-occupiedP = (location, throttle = time.oneMinute * 5) ->
+occupiedP = (location, throttle = time.oneMinute * 30) ->
     motionP = sensors.sensorP({type: "motion", location})
     motionOn = motionP.changes().filter((x) -> x > 0)
     motionOff = motionP.changes().filter((x) -> x == 0)
