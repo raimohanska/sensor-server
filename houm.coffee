@@ -13,21 +13,22 @@ houmConfig = require('./config').houm
 houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
   .map(JSON.parse)
   .map(".lights")
-  .map((lights) => lights.map(({name,room,_id})=>{name,room,id:_id}))
+  .map((lights) => lights.map(({name,room,_id})=>{light:name,room,lightId:_id}))
   .toProperty()
 houmLightsP
   .forEach log, "HOUM lights found"
 houmConnectE.onValue =>
   houmSocket.emit('clientReady', { siteKey: houmConfig.siteKey})
   log "Connected to HOUM"
-houmReadyP = B.once(false).concat(B.combineAsArray(houmConnectE, houmLightsP).map(true)).toProperty()
-houmReadyP.filter(B._.id) .forEach -> log "HOUM ready"
+houmReadyE = B.combineAsArray(houmConnectE, houmLightsP).map(true)
+houmReadyP = B.once(false).concat(houmReadyE).toProperty()
+houmReadyE.forEach -> log "HOUM ready"
 
 lightE= B.fromEvent(houmSocket, 'setLightState')
 lightStateE = lightE
   .combine houmLightsP, ({_id, bri}, lights) ->
     light = findById _id, lights
-    { lightId: light.id, room: light.room, light: light.name, type:"brightness", value:bri }
+    { lightId: light.lightId, room: light.room, light: light.light, type:"brightness", value:bri }
   .sampledBy(lightE)
 
 fullLightStateP = lightStateE.scan {}, (state, light) ->
@@ -42,7 +43,6 @@ lightStateP = (query) ->
 
 totalBrightnessP = (query) ->
   fullLightStateP
-    .log()
     .map(filterLightState(query))
     .map (state) -> R.sum(R.values(state).map((light) -> light.value))
 
@@ -53,28 +53,29 @@ matchLight = (query) -> (light) ->
   if not query instanceof Array
     query = [query]
   matchSingle = (q) ->
-    log "matching", q, light
+    #log "matching", q, light
     light.lightId == q || light.light.toLowerCase() == q.toLowerCase() || light.room.toLowerCase() == q.toLowerCase()
   R.any matchSingle query
 
-setLight = (name) -> (bri) ->
+setLight = (query) -> (bri) ->
   houmLightsP.take(1).forEach (lights) ->
-    light = findByName name, lights
-    lightOn = bri
-    if typeof bri == "number"
-      lightOn = bri>0
+    lights = findByQuery query, lights
+    if lights.length > 0
+      lights.forEach (light) ->
+        lightOn = bri
+        if typeof bri == "number"
+          lightOn = bri>0
+        else
+          bri = if lightOn then 255 else 0
+        log "Set", light.light, "bri="+bri, "on="+lightOn
+        houmSocket.emit('apply/light', {_id: light.lightId, on: lightOn, bri })
     else
-      bri = if lightOn then 255 else 0
-    log "Set", name, "bri="+bri, "on="+lightOn
-    if light
-      houmSocket.emit('apply/light', {_id: light.id, on: lightOn, bri })
-    else
-      log "ERROR: light", name, " not found"
+      log "ERROR: light", query, " not found"
 
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
 findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
-findById = (id, lights) -> R.find(((light) -> light.id == id), lights)
+findById = (id, lights) -> R.find(((light) -> light.lightId == id), lights)
 findByQuery = (query, lights) -> R.filter(matchLight(query), lights)
 
-module.exports = { houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }
+module.exports = { houmReadyE, houmReadyP, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }

@@ -10,4 +10,6 @@ oneMinute = 60 * oneSecond
 eachSecondE = B.interval(1000).map(-> moment())
 eachMinuteE = eachSecondE.filter((time) -> time.seconds() == 0)
 
-module.exports = { eachSecondE, eachMinuteE, oneHour, oneMinute, oneSecond }
+formatDuration = (millis) -> moment.duration(millis, 'milliseconds').humanize()
+
+module.exports = { eachSecondE, eachMinuteE, oneHour, oneMinute, oneSecond, formatDuration }

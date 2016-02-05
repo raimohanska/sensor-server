@@ -10,4 +10,10 @@ occupiedP = (location, throttle = time.oneMinute * 30) ->
       .flatMapLatest (x) -> B.once(x).concat(motionOff.delay(throttle).map(0))
       .toProperty(0).skipDuplicates()
 
-module.exports = {occupiedP}
+inactiveE = (location, throttle = time.oneHour) ->
+  occupiedP(location, throttle)
+    .changes()
+    .filter((x) -> !x)
+    .map("location unoccupied for " + time.formatDuration(throttle))
+
+module.exports = {occupiedP, inactiveE}
