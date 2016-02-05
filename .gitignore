@@ -4,3 +4,4 @@ log
 log.txt
 npm-debug.log
 config.coffee
+smoothtest.coffee

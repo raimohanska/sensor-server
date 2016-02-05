@@ -28,6 +28,7 @@ if config.init
   mods = {
     time: require("./time"),
     sun: require("./sun"),
+    motion: require("./motion"),
     sensors,
     log,
     R,
