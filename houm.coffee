@@ -106,7 +106,7 @@ if houmConfig.tcpLights?
   R.toPairs(houmConfig.tcpLights).forEach ([lightId, deviceId]) ->
     lightStateP(lightId).forEach (state) ->
       log "tcp light state for " + deviceId + ": " + state
-      tcpServer.sendToDevice deviceId, state
+      tcpServer.sendToDevice(deviceId)(state)
 
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 

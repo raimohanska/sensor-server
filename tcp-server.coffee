@@ -36,12 +36,13 @@ if port?
         socket.end()
       else
         id = login.device
+        B.interval(30000).map({"ping":"ping"}).takeUntil(discoE).forEach(sendToDevice(id))
         addSocketE.push {id, socket}
     jsonE.log 'received'
   ).listen(port)
   log "TCP listening on port", port
 
-sendToDevice = (id, msg) ->
+sendToDevice = (id) -> (msg) ->
   devicesP.take(1).onValue (devices) ->
     device = R.find(R.propEq('id', id), devices)
     if device
