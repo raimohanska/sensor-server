@@ -14,8 +14,10 @@ ONE_HOUR = 3600 * 1000
 LIGHT = 255
 DARK = 0
 
+url = -> "http://api.sunrise-sunset.org/json?lat="+config.latitude+"&lng="+config.longitude+"&date="+(new Date().toISOString())
+
 sunLightInfoP = B.once().concat(B.interval(ONE_HOUR))
-  .flatMap -> B.fromPromise(rp("http://api.sunrise-sunset.org/json?lat="+config.latitude+"&lng="+config.longitude+"&date=today"))
+  .flatMap -> B.fromPromise(rp(url()))
   .map(JSON.parse)
   .map(".results")
   .toProperty()
