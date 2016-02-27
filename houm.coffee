@@ -84,6 +84,7 @@ fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
     lights = findByQuery query, R.values(lights)
     if lights.length > 0
       lights.forEach (light) ->
+        #log "fading light", light.light, "from", light.value, "to", bri, "in", time.formatDuration(duration)
         if !light.value
           setLight(light.lightId)(bri)
         else
