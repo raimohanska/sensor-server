@@ -14,8 +14,6 @@ sensorE = eventBus.merge(HttpServer.sensorE)
 
 pushEvent = eventBus.push.bind(eventBus)
 
-sensorE.log("storing")
-
 sensorP = (props) -> sensorE.filter(R.whereEq props).map(".value").toProperty()
 
 module.exports = { sensorE, sensorP, pushEvent }
