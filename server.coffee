@@ -12,6 +12,7 @@ validate = require "./validate"
 mapProperties = require "./property-mapping"
 config = require "./config"
 sensors = require "./sensors"
+tcpServer = require "./tcp-server"
 
 sensorE = sensors.sensorE
 
