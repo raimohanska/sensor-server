@@ -7,6 +7,7 @@ moment = require 'moment'
 io = require('socket.io-client')
 log = (msg...) -> console.log new Date().toString(), msg...
 rp = require('request-promise')
+tcpServer = require './tcp-server'
 houmSocket = io('http://houmi.herokuapp.com')
 houmConnectE = B.fromEvent(houmSocket, "connect")
 houmDisconnectE = B.fromEvent(houmSocket, "disconnect")
@@ -100,6 +101,12 @@ fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
               setLight(light.lightId)(nextBri)
     else
       log "ERROR: light", query, " not found"
+
+if houmConfig.tcpLights?
+  R.toPairs(houmConfig.tcpLights).forEach ([lightId, deviceId]) ->
+    lightStateP(lightId).forEach (state) ->
+      log "tcp light state for " + deviceId + ": " + state
+      tcpServer.sendToDevice deviceId, state
 
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
