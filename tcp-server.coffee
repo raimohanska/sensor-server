@@ -1,9 +1,10 @@
-"use strict";
 net = require 'net'
 B = require 'baconjs'
 R = require 'ramda'
 log = require "./log"
 carrier = require "carrier"
+config = require('./config').tcp
+port = config?.port
 
 addSocketE = B.Bus()
 addSocketE.map(".id").forEach log, "TCP device connected"
@@ -17,20 +18,22 @@ devicesP = B.update([],
 deviceIdsP = devicesP.map (devices) -> devices.map(({id}) -> id)
 deviceIdsP.log("Connected devices")
 
-net.createServer((socket) ->
-  log 'connected', socket.remoteAddress
-  id = null
-  discoE = B.fromEvent(socket, 'close').take(1).map(() => ({ socket, id }))
-  discoE.forEach => log 'disconnected', socket.remoteAddress
-  removeSocketE.plug(discoE.filter(".id"))
-  lineE = B.fromEvent((carrier.carry socket), "line")
-  jsonE = lineE.flatMap(B.try(JSON.parse))
-  jsonE.onError log
-  jsonE.map(".device").filter(B._.id).take(1).onValue (device) ->
-    id = device
-    addSocketE.push {id, socket}
-  jsonE.log 'received'
-).listen(8000)
+if port?
+  net.createServer((socket) ->
+    log 'connected', socket.remoteAddress
+    id = null
+    discoE = B.fromEvent(socket, 'close').take(1).map(() => ({ socket, id }))
+    discoE.forEach => log 'disconnected', socket.remoteAddress
+    removeSocketE.plug(discoE.filter(".id"))
+    lineE = B.fromEvent((carrier.carry socket), "line")
+    jsonE = lineE.flatMap(B.try(JSON.parse))
+    jsonE.onError log
+    jsonE.map(".device").filter(B._.id).take(1).onValue (device) ->
+      id = device
+      addSocketE.push {id, socket}
+    jsonE.log 'received'
+  ).listen(port)
+  log "TCP listening on port", port
 
 sendToDevice = (id, msg) ->
   devicesP.take(1).onValue (devices) ->
