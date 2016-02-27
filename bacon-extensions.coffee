@@ -11,11 +11,14 @@ B.range = (start, end, interval) ->
     else
       false
 
-B.Observable :: repeatBy = (keyF, interval) ->
+B.Observable :: repeatBy = (keyF, interval, throttle = time.oneSecond) ->
   src = this
   src.flatMap (event) ->
     key = keyF(event)
-    B.once(event).concat(B.interval(interval, event).takeUntil(src.filter((e) -> keyF(e) == key)))
+    B.once(event)
+      .concat(B.interval(interval, event)
+      .takeUntil(src.filter((e) -> keyF(e) == key)))
+      .throttle(throttle)
 
 B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
   this
