@@ -14,6 +14,6 @@ inactiveE = (location, throttle = time.oneHour) ->
   occupiedP(location, throttle)
     .changes()
     .filter((x) -> !x)
-    .map("location unoccupied for " + time.formatDuration(throttle))
+    .map(location + " unoccupied for " + time.formatDuration(throttle))
 
 module.exports = {occupiedP, inactiveE}
