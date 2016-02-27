@@ -10,6 +10,12 @@ addSocketE.map(".id").forEach log, "TCP device connected"
 removeSocketE = B.Bus()
 removeSocketE.map(".id").forEach log, "TCP device disconnected"
 
+devicesP = B.update([],
+  addSocketE, ((xs, x) -> xs.concat(x)),
+  removeSocketE, ((xs, x) -> xs.filter ((d) -> d.id != x.id)))
+
+devicesP.log("Connected devices")
+
 net.createServer((socket) ->
   log 'connected', socket.remoteAddress
   id = null
