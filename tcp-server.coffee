@@ -14,7 +14,8 @@ devicesP = B.update([],
   addSocketE, ((xs, x) -> xs.concat(x)),
   removeSocketE, ((xs, x) -> xs.filter ((d) -> d.id != x.id)))
 
-devicesP.log("Connected devices")
+deviceIdsP = devicesP.map (devices) -> devices.map(({id}) -> id)
+deviceIdsP.log("Connected devices")
 
 net.createServer((socket) ->
   log 'connected', socket.remoteAddress
@@ -30,3 +31,13 @@ net.createServer((socket) ->
     addSocketE.push {id, socket}
   jsonE.log 'received'
 ).listen(8000)
+
+sendToDevice = (id, msg) ->
+  devicesP.take(1).onValue (devices) ->
+    device = R.find(R.propEq('id', id), devices)
+    if device
+      device.socket.send(msg)
+    else
+      log "unknown device", id
+
+module.exports = { devicesP, sendToDevice }

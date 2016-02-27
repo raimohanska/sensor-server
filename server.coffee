@@ -33,7 +33,8 @@ if config.init
     sensors,
     log,
     R,
-    B
+    B,
+    devices: tcpServer
   }
 
   if config.houm
