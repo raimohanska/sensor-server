@@ -39,7 +39,7 @@ sendToDevice = (id, msg) ->
   devicesP.take(1).onValue (devices) ->
     device = R.find(R.propEq('id', id), devices)
     if device
-      device.socket.write(JSON.stringify(msg), "utf-8")
+      device.socket.write(JSON.stringify(msg)+"\n", "utf-8")
     else
       log "unknown device", id
 
