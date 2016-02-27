@@ -27,10 +27,16 @@ if port?
     removeSocketE.plug(discoE.filter(".id"))
     lineE = B.fromEvent((carrier.carry socket), "line")
     jsonE = lineE.flatMap(B.try(JSON.parse))
-    jsonE.onError log
-    jsonE.map(".device").filter(B._.id).take(1).onValue (device) ->
-      id = device
-      addSocketE.push {id, socket}
+    jsonE.onError (err) ->
+      log socket.remoteAddress,  err
+      socket.end()
+    jsonE.take(1).onValue (login) ->
+      if !login.device?
+        log "invalid login message", login
+        socket.end()
+      else
+        id = login.device
+        addSocketE.push {id, socket}
     jsonE.log 'received'
   ).listen(port)
   log "TCP listening on port", port
