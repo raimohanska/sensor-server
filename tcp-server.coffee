@@ -4,12 +4,14 @@ R = require 'ramda'
 log = require "./log"
 carrier = require "carrier"
 config = require('./config').tcp
+sensors = require './sensors'
 port = config?.port
 
 addSocketE = B.Bus()
 addSocketE.map(".id").forEach log, "TCP device connected"
 removeSocketE = B.Bus()
 removeSocketE.map(".id").forEach log, "TCP device disconnected"
+messageFromDeviceE = B.Bus()
 
 devicesP = B.update([],
   addSocketE, ((xs, x) -> xs.concat(x)),
@@ -37,10 +39,18 @@ if port?
       else
         id = login.device
         B.interval(30000).map({"ping":"ping"}).takeUntil(discoE).forEach(sendToDevice(id))
+        messageFromDeviceE.push(login)
+        jsonE.onValue (msg) ->
+          msg.device = id
+          messageFromDeviceE.push(msg)
         addSocketE.push {id, socket}
-    jsonE.log 'received'
+    jsonE.log 'Message from device ' + id
   ).listen(port)
   log "TCP listening on port", port
+
+messageFromDeviceE
+  .filter((m) -> m.value?)
+  .onValue(sensors.pushEvent)
 
 sendToDevice = (id) -> (msg) ->
   devicesP.take(1).onValue (devices) ->
@@ -50,4 +60,4 @@ sendToDevice = (id) -> (msg) ->
     else
       log "unknown device", id
 
-module.exports = { devicesP, sendToDevice }
+module.exports = { devicesP, sendToDevice, messageFromDeviceE }
