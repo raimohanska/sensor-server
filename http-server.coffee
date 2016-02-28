@@ -3,6 +3,7 @@ app = express()
 http = require('http').Server(app)
 log = require "./log"
 bodyParser = require "body-parser"
+sensors = require "./sensors"
 Bacon = require "baconjs"
 
 port = process.env.PORT || 5080
@@ -22,6 +23,8 @@ app.post "/event", jsonParser, (req, res) ->
 
 http.listen port, ->
   log "HTTP listening on port", port
+
+sensorE.forEach sensors.pushEvent
 
 sensorE.log("HTTP sensor event")
 

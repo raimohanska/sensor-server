@@ -8,7 +8,7 @@ config = require "./config"
 
 eventBus = B.Bus()
 
-sensorE = eventBus.merge(HttpServer.sensorE)
+sensorE = eventBus
   .flatMap(validate)
   .map(mapProperties)
 
