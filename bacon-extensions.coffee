@@ -53,3 +53,20 @@ B.Property :: smooth = (fadeStepTime = 100, fadeStep = 0.1) ->
           value
     .toProperty()
     .skipDuplicates()
+
+B.Property :: combineWithHistory = (delay, combinator) ->
+  this
+    .delay(delay)
+    .combine this, combinator
+    .skipDuplicates()
+
+B.Property :: hasMaintainedValueForPeriod = (value, period) ->
+  this
+    .skipDuplicates()
+    .flatMapLatest (x) ->
+      if x == value
+        B.once(false).concat(B.later(period, true))
+      else
+        false
+    .toProperty(false)
+    .skipDuplicates()
