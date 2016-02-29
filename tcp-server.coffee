@@ -26,6 +26,7 @@ if port?
     id = null
     discoE = B.fromEvent(socket, 'close').take(1).map(() => ({ socket, id }))
     discoE.forEach => log 'disconnected', socket.remoteAddress
+    errorE = B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress)
     removeSocketE.plug(discoE.filter(".id"))
     lineE = B.fromEvent((carrier.carry socket), "line")
     jsonE = lineE.flatMap(B.try(JSON.parse))
@@ -42,9 +43,9 @@ if port?
         messageFromDeviceE.push(login)
         jsonE.onValue (msg) ->
           msg.device = id
+          log 'Message from device ' + id
           messageFromDeviceE.push(msg)
         addSocketE.push {id, socket}
-    jsonE.log 'Message from device ' + id
   ).listen(port)
   log "TCP listening on port", port
 
