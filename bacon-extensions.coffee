@@ -2,6 +2,7 @@ B = require "baconjs"
 time = require "./time"
 scale = require "./scale"
 log = require "./log"
+store = require("./store")("latest-values")
 
 B.range = (start, end, interval) ->
   B.repeat (i) ->
@@ -41,6 +42,12 @@ B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
       .map (step) ->
         scale(step + 1, 0, steps, from, to)
       .concat(B.once(to))
+
+B.Property :: persist = (key) ->
+  startValueP = store.read(key)
+  this.changes().forEach (value) -> store.write(key, value)
+  data = startValueP.toEventStream().concat(this).toProperty().skipDuplicates()
+  data.log(key)
 
 B.Property :: smooth = (fadeStepTime = 100, fadeStep = 0.1) ->
   src = this
