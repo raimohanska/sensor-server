@@ -108,10 +108,28 @@ if houmConfig.tcpLights?
       log "tcp light state for " + deviceId + ": " + state
       tcpServer.sendToDevice(deviceId)(state)
 
+controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
+  manualOverrideE = lightStateP(query)
+    .map(".value")
+    .withLatestFrom(controlP, (x,y)->[x,y])
+    .flatMap ([newValue, expectedValue]) ->
+      if newValue != expectedValue
+        newValue
+      else
+        B.never()
+  manualOverrideE.log ("manual override value for " + query)
+
+  manualOverrideP = manualOverrideE
+    .flatMap -> B.once(true).concat(B.later(manualOverridePeriod, false))
+    .toProperty(false)
+    .log("manual override active for " + query)
+
+  controlP.filter(manualOverrideP.not()).forEach(setLight query)
+
 quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
 findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
 findById = (id, lights) -> R.find(((light) -> light.lightId == id), lights)
 findByQuery = (query, lights) -> R.filter(matchLight(query), lights)
 
-module.exports = { houmReadyE, houmReadyP, fadeLight, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }
+module.exports = { controlLight, houmReadyE, houmReadyP, fadeLight, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }
