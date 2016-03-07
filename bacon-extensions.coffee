@@ -12,6 +12,9 @@ B.range = (start, end, interval) ->
     else
       false
 
+B.Observable :: withLatestFrom = (other, f) ->
+  other.sampledBy this, (v2, v1) -> f(v1, v2)
+
 B.Observable :: repeatBy = (keyF, interval, throttle = time.oneSecond) ->
   src = this
   src.flatMap (event) ->
