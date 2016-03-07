@@ -1,5 +1,6 @@
 #!/usr/bin/env coffee
 "use strict"
+util = require "util"
 B = require('baconjs')
 R = require('ramda')
 time = require "./time"
@@ -12,6 +13,7 @@ houmSocket = io('http://houmi.herokuapp.com')
 houmConnectE = B.fromEvent(houmSocket, "connect")
 houmDisconnectE = B.fromEvent(houmSocket, "disconnect")
 houmConfig = require('./config').houm
+tcpDevices = R.toPairs(require('./config').devices).map ([deviceId, {properties}]) -> [properties?.lightId, deviceId]
 houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
   .map(JSON.parse)
   .map(".lights")
@@ -102,10 +104,10 @@ fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
     else
       log "ERROR: light", query, " not found"
 
-if houmConfig.tcpLights?
-  R.toPairs(houmConfig.tcpLights).forEach ([lightId, deviceId]) ->
+tcpDevices.forEach ([lightId, deviceId]) ->
+  if lightId
     lightStateP(lightId).forEach (state) ->
-      log "tcp light state for " + deviceId + ": " + state
+      log "tcp light state for " + deviceId + ": " + util.inspect(state)
       tcpServer.sendToDevice(deviceId)(state)
 
 controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
