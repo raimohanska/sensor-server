@@ -111,13 +111,14 @@ if houmConfig.tcpLights?
 controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
   manualOverrideE = lightStateP(query)
     .map(".value")
-    .withLatestFrom(controlP, (x,y)->[x,y])
-    .flatMap ([newValue, expectedValue]) ->
+    .withLatestFrom(controlP, (newValue, expectedValue) ->
       if newValue != expectedValue
-        newValue
+        true
       else
-        B.never()
-  manualOverrideE.log ("manual override value for " + query)
+        false)
+    .debounce(time.oneSecond * 10)
+    .skipDuplicates()
+    .filter(B._.id)
 
   manualOverrideP = manualOverrideE
     .flatMap -> B.once(true).concat(B.later(manualOverridePeriod, false))
