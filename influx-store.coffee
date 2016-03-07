@@ -18,7 +18,7 @@ if config
     if event.timestamp
       influxEvent.fields.time = new Date(event.timestamp)
 
-    log "storing to InfluxDB", JSON.stringify(influxEvent)
+    #log "storing to InfluxDB", JSON.stringify(influxEvent)
     client.writePoint influxEvent.key, influxEvent.fields, influxEvent.tags, (err, response) ->
       if (err)
         log "ERROR: " + err.stack.split("\n")
