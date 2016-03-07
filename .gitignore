@@ -3,6 +3,6 @@ node_modules
 log
 log.txt
 npm-debug.log
-config.coffee
+*config.coffee
 smoothtest.coffee
 latest-values.json
