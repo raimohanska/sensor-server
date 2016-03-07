@@ -1,11 +1,14 @@
 log = require "./log"
-mappings = (require "./config").propertyMapping||{}
+devices = (require "./config").devices || {}
 R = require "ramda"
 
 mapProperties = (event) ->
-  mapped = R.find(({match}) -> R.whereEq(match)(event))(mappings)
-  if mapped
-    event=R.merge(event, mapped.properties)
-  event
+  device = devices[event.device]
+  if device?
+    properties = device.properties || {}
+    sensorProperties = device.sensors?[event.sensor] || {}
+    R.mergeAll([event, properties, sensorProperties])
+  else
+    event
 
 module.exports = mapProperties
