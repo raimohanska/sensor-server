@@ -15,7 +15,7 @@ messageFromDeviceE = B.Bus()
 
 devicesP = B.update([],
   addSocketE, ((xs, x) -> xs.concat(x)),
-  removeSocketE, ((xs, x) -> xs.filter ((d) -> d.id != x.id)))
+  removeSocketE, ((xs, x) -> xs.filter ((d) -> d.socket != x.socket)))
 
 deviceIdsP = devicesP.map (devices) -> devices.map(({id}) -> id)
 deviceIdsP.log("Connected devices")
@@ -27,7 +27,7 @@ if port?
     discoE = B.fromEvent(socket, 'close').take(1).map(() => ({ socket, id }))
     discoE.forEach => log 'disconnected', socket.remoteAddress
     errorE = B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress)
-    removeSocketE.plug(discoE.filter(".id"))
+    removeSocketE.plug(discoE)
     lineE = B.fromEvent((carrier.carry socket), "line")
     jsonE = lineE.flatMap(B.try(JSON.parse))
     jsonE.onError (err) ->
@@ -43,7 +43,7 @@ if port?
         messageFromDeviceE.push(login)
         jsonE.onValue (msg) ->
           msg.device = id
-          log 'Message from device ' + id
+          log 'Message from device ' + id + ": " + JSON.stringify(msg)
           messageFromDeviceE.push(msg)
         addSocketE.push {id, socket}
   ).listen(port)
@@ -55,10 +55,8 @@ messageFromDeviceE
 
 sendToDevice = (id) -> (msg) ->
   devicesP.take(1).onValue (devices) ->
-    device = R.find(R.propEq('id', id), devices)
-    if device
+    devices = R.filter(R.propEq('id', id), devices)
+    devices.forEach (device) ->
       device.socket.write(JSON.stringify(msg)+"\n", "utf-8")
-    else
-      log "unknown device", id
 
 module.exports = { devicesP, sendToDevice, messageFromDeviceE }
