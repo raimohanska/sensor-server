@@ -8,10 +8,12 @@ sensors = require './sensors'
 port = config?.port
 
 addSocketE = B.Bus()
-addSocketE.map(".id").forEach log, "TCP device connected"
 removeSocketE = B.Bus()
 removeSocketE.map(".id").forEach log, "TCP device disconnected"
 messageFromDeviceE = B.Bus()
+
+deviceConnectedE = addSocketE.map(".id")
+deviceConnectedE.forEach log, "TCP device connected"
 
 devicesP = B.update([],
   addSocketE, ((xs, x) -> xs.concat(x)),
@@ -59,4 +61,4 @@ sendToDevice = (id) -> (msg) ->
     devices.forEach (device) ->
       device.socket.write(JSON.stringify(msg)+"\n", "utf-8")
 
-module.exports = { devicesP, sendToDevice, messageFromDeviceE }
+module.exports = { devicesP, deviceConnectedE, sendToDevice, messageFromDeviceE }

@@ -106,9 +106,14 @@ fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
 
 tcpDevices.forEach ([lightId, deviceId]) ->
   if lightId
-    lightStateP(lightId).forEach (state) ->
-      log "tcp light state for " + deviceId + ": " + util.inspect(state)
+    sendState = (state) ->
+      log "send light state to tcp device " + JSON.stringify(state)
       tcpServer.sendToDevice(deviceId)(state)
+    lightStateP(lightId).forEach(sendState)
+    tcpServer.deviceConnectedE
+      .filter((id) -> id == deviceId)
+      .map(lightStateP(lightId))
+      .forEach(sendState)
 
 controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
   manualOverrideE = lightStateP(query)
