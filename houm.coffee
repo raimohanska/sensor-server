@@ -76,11 +76,17 @@ setLight = (query) -> (bri) ->
         if typeof bri == "number"
           lightOn = bri>0
         else
-          bri = if lightOn then 255 else 0
+          bri = booleanToBri(lightOn)
         log "Set", light.light, "bri="+bri, "on="+lightOn
         houmSocket.emit('apply/light', {_id: light.lightId, on: lightOn, bri })
     else
       log "ERROR: light", query, " not found"
+
+booleanToBri = (b) -> 
+  if typeof b == "number"
+    b
+  else
+    if b then 255 else 0
 
 fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
   fullLightStateP.take(1).forEach (lights) ->
@@ -119,7 +125,8 @@ controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
   manualOverrideE = lightStateP(query)
     .map(".value")
     .withLatestFrom(controlP, (newValue, expectedValue) ->
-      if newValue != expectedValue
+      if newValue != booleanToBri(expectedValue)
+        #log "Manual override for " + query + " because " + newValue + " <> " + expectedValue
         true
       else
         false)
