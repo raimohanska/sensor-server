@@ -147,4 +147,7 @@ findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == na
 findById = (id, lights) -> R.find(((light) -> light.lightId == id), lights)
 findByQuery = (query, lights) -> R.filter(matchLight(query), lights)
 
-module.exports = { controlLight, houmReadyE, houmReadyP, fadeLight, setLight, quadraticBrightness, houmLightsP, lightStateE, lightStateP, totalBrightnessP }
+module.exports = {
+  houmReadyE, houmReadyP, houmLightsP, lightStateE, lightStateP, totalBrightnessP,
+  controlLight, fadeLight, setLight,
+  quadraticBrightness, booleanToBri }
