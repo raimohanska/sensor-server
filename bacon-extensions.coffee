@@ -52,7 +52,7 @@ B.Property :: persist = (key) ->
   data = startValueP.toEventStream().concat(this).toProperty().skipDuplicates()
   data.log(key)
 
-B.Property :: smooth = ({stepTime = 100, step = 0.1}) ->
+B.Property :: smooth = ({stepTime, step} = {stepTime: 100, step: 0.1}) ->
   src = this
   value = undefined
   src
