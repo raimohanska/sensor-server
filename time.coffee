@@ -11,7 +11,7 @@ eachSecondE = B.interval(1000).map(now)
 eachMinuteE = eachSecondE.filter((time) -> time.seconds() == 0)
 eachHourE = eachMinuteE.filter((time) -> time.minutes() == 0)
 midnightE = eachHourE.filter((time) -> time.hours() == 0)
-hourOfDayP = eachHourE.toProperty(0).map(now).toProperty().skipDuplicates()
+hourOfDayP = eachHourE.toProperty(0).map(now).map(".hours").toProperty().skipDuplicates()
 
 formatDuration = (millis) -> moment.duration(millis, 'milliseconds').humanize()
 
