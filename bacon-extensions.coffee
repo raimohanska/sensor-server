@@ -52,12 +52,12 @@ B.Property :: persist = (key) ->
   data = startValueP.toEventStream().concat(this).toProperty().skipDuplicates()
   data.log(key)
 
-B.Property :: smooth = (fadeStepTime = 100, fadeStep = 0.1) ->
+B.Property :: smooth = ({stepTime = 100, step = 0.1}) ->
   src = this
   value = undefined
   src
     .flatMapLatest (newValue) ->
-      B.fade(value, newValue, fadeStepTime, fadeStep)
+      B.fade(value, newValue, stepTime, step)
         .map (newValue) ->
           value = newValue
           value
