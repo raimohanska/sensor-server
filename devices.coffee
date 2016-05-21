@@ -19,6 +19,7 @@ devicesStatusP = B.update(
 
 devicesStatusP.log()
 
-reportDeviceSeen = (key) -> deviceSeenE.push(key)
+reportDeviceSeen = (key) -> if key?
+  deviceSeenE.push(key)
 
 module.exports = { reportDeviceSeen }
