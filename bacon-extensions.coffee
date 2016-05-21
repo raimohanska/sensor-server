@@ -24,6 +24,10 @@ B.Observable :: repeatBy = (keyF, interval, throttle = time.oneSecond) ->
       .takeUntil(src.filter((e) -> keyF(e) == key)))
       .throttle(throttle)
 
+B.Observable :: repeatLatest = (interval) ->
+  this.flatMapLatest (value) ->
+    B.once(value).concat(B.interval(interval, value))
+
 B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
   this
     .scan false, (prev, val) ->
