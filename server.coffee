@@ -1,7 +1,9 @@
 #!/usr/bin/env coffee
+require "./polyfills.js"
 require('es6-promise').polyfill()
 R = require "ramda"
 log = require "./log"
+time = require "./time"
 log "Starting"
 B=require "baconjs"
 require "./bacon-extensions"
@@ -20,6 +22,7 @@ sensorE
   .onValue(KeenSender.send)
 
 sensorE
+  .repeatBy(((e) -> e.device), time.oneHour, time.oneSecond)
   .onValue(Influx.store)
 
 sensorE
