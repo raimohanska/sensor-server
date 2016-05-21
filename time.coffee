@@ -16,6 +16,7 @@ hourOfDayP = eachHourE.toProperty(0).map(now).map(".hours").toProperty().skipDup
 formatDuration = (millis) -> moment.duration(millis, 'milliseconds').humanize()
 
 module.exports = {
+  now,
   eachSecondE, eachMinuteE, eachHourE, midnightE,
   hourOfDayP,
   oneHour, oneMinute, oneSecond,

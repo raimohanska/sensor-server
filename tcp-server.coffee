@@ -5,6 +5,8 @@ log = require "./log"
 carrier = require "carrier"
 config = require('./config').tcp
 sensors = require './sensors'
+devices = require './devices'
+
 port = config?.port
 
 addSocketE = B.Bus()
@@ -54,6 +56,10 @@ if port?
 messageFromDeviceE
   .filter((m) -> m.value?)
   .onValue(sensors.pushEvent)
+
+messageFromDeviceE
+  .map(".device")
+  .onValue(devices.reportDeviceSeen)
 
 sendToDevice = (id) -> (msg) ->
   devicesP.take(1).onValue (devices) ->

@@ -4,6 +4,7 @@ http = require('http').Server(app)
 log = require "./log"
 bodyParser = require "body-parser"
 sensors = require "./sensors"
+devices = require "./devices"
 Bacon = require "baconjs"
 
 port = process.env.PORT || 5080
@@ -25,6 +26,8 @@ http.listen port, ->
   log "HTTP listening on port", port
 
 sensorE.forEach sensors.pushEvent
+
+sensorE.map(".device").onValue(devices.reportDeviceSeen)
 
 sensorE.log("HTTP sensor event")
 
