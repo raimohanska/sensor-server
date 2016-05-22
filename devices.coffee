@@ -11,7 +11,7 @@ devices = (require "./config").devices || {}
 deviceSeenE = B.Bus()
 
 updateDeviceSeen = (deviceStatii, key) ->
-  L.set(L.compose(key, "lastSeen"), time.now().unix(), deviceStatii)
+  L.set(L.compose(key, "lastSeen"), time.now().toString(), deviceStatii)
 
 devicesStatusP = B.update(
   R.fromPairs(R.keys(devices).map((key) -> [key, {}])),
