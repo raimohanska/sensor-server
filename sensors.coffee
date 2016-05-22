@@ -1,7 +1,6 @@
 R = require "ramda"
 log = require "./log"
 B=require "baconjs"
-HttpServer = require "./http-server"
 validate = require "./validate"
 mapProperties = require "./property-mapping"
 config = require "./config"
