@@ -15,4 +15,8 @@ pushEvent = eventBus.push.bind(eventBus)
 
 sensorP = (props) -> sensorE.filter(R.whereEq props).map(".value").toProperty()
 
-module.exports = { sensorE, sensorP, pushEvent }
+sourceHash = (event) -> R.join('')(R.chain(
+  ([k,v]) -> if k == "value" then [] else [k+v],
+  R.toPairs(event)))
+
+module.exports = { sensorE, sensorP, pushEvent, sourceHash }

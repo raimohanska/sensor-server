@@ -22,7 +22,7 @@ sensorE
   .onValue(KeenSender.send)
 
 sensorE
-  .repeatBy(((e) -> e.device), time.oneHour, time.oneSecond)
+  .repeatBy(sensors.sourceHash, time.oneHour, time.oneSecond)
   .onValue(Influx.store)
 
 sensorE
