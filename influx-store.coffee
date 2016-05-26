@@ -10,7 +10,9 @@ if config
   store = (event) ->
     influxEvent =
       key: event.type
-      tags: R.fromPairs(R.toPairs(event).filter(([key, value]) -> !R.contains(key)(["type", "value", "timestamp"])))
+      tags: R.fromPairs(R.toPairs(event).filter(([key, value]) ->
+        !R.contains(key)(["type", "value", "timestamp"]) && typeof value != "object"
+      ))
       fields: {
         value: event.value
       }
