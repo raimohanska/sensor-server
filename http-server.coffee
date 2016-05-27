@@ -29,6 +29,6 @@ sensorE.forEach sensors.pushEvent
 
 sensorE.map(".device").onValue(devices.reportDeviceSeen)
 
-sensorE.log("HTTP sensor event")
+sensorE.map(JSON.stringify).log("HTTP sensor event")
 
 module.exports = { sensorE }
