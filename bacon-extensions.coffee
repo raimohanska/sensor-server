@@ -51,11 +51,11 @@ B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
         scale(step + 1, 0, steps, from, to)
       .concat(B.once(to))
 
-B.Property :: persist = (key) ->
+B.Property :: persist = (key, shouldLog = true) ->
   startValueP = store.read(key)
   this.changes().forEach (value) -> store.write(key, value)
   data = startValueP.toEventStream().concat(this).toProperty().skipDuplicates()
-  data.log(key)
+  if shouldLog then data.log(key) else data
 
 B.Property :: smooth = ({stepTime, step} = {stepTime: 100, step: 0.1}) ->
   src = this

@@ -18,7 +18,9 @@ devicesStatusP = B.update(
   R.fromPairs(R.keys(devices).map((key) -> [key, {}])),
   [deviceSeenE], updateDeviceSeen
   [store.read().toEventStream()], (_, storedState) -> storedState
-).persist("deviceStatus")
+).persist("deviceStatus", false)
+
+devicesStatusP.throttle(time.oneMinute * 10).log("deviceStatus")
 
 reportDeviceSeen = (key) -> if key?
   deviceSeenE.push(key)
