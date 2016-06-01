@@ -23,7 +23,7 @@ B.Observable :: repeatBy = (keyF, interval, throttle = time.oneSecond) ->
       B.once(event)
         .concat(B.interval(interval, event)
           .takeUntil(src.filter((e) -> keyF(e) == key)))
-    .throttle(throttle)
+      .throttle(throttle)
 
 B.Observable :: repeatLatest = (interval) ->
   this.flatMapLatest (value) ->
