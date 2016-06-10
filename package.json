@@ -19,11 +19,12 @@
     "influx": "git://github.com/node-influx/node-influx",
     "keen.io": "^0.1",
     "moment": "^2.11.0",
-    "ramda": "^0.19",
     "partial.lenses": "^3",
+    "ramda": "^0.19",
     "request-promise": "^1.0.2",
     "socket.io": "^1.3.6",
-    "socket.io-client": "^1.2.1"
+    "socket.io-client": "^1.2.1",
+    "suncalc": "^1.7.0"
   },
   "devDependencies": {
     "nodemon": "^1"

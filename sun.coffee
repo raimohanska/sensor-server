@@ -2,10 +2,10 @@ R = require "ramda"
 log = require "./log"
 B=require "baconjs"
 moment=require "moment"
-rp = require 'request-promise'
 config =  require "./config"
 time = require "./time"
 scale = require "./scale"
+suncalc = require "suncalc"
 
 parseTime = (str) -> 
   moment(str + " +0000", "h:mm:ss A Z")
@@ -14,20 +14,16 @@ ONE_HOUR = 3600 * 1000
 LIGHT = 255
 DARK = 0
 
-url = -> "http://api.sunrise-sunset.org/json?lat="+config.latitude+"&lng="+config.longitude+"&date="+(new Date().toISOString())
-
 sunLightInfoP = B.once().concat(B.interval(ONE_HOUR))
-  .flatMap -> B.fromPromise(rp(url()))
-  .map(JSON.parse)
-  .map(".results")
+  .map(suncalc.getTimes(new Date(), config.latitude, config.longitude))
   .toProperty()
   .skipDuplicates(R.equals)
   .map (sunInfo) ->
     {
-      twilightBegin: parseTime(sunInfo.civil_twilight_begin)
-      sunrise: parseTime(sunInfo.sunrise)
-      sunset: parseTime(sunInfo.sunset)
-      twilightEnd: parseTime(sunInfo.civil_twilight_end)
+      twilightBegin: moment(sunInfo.dawn)
+      sunrise: moment(sunInfo.sunrise)
+      sunset: moment(sunInfo.sunset)
+      twilightEnd: moment(sunInfo.dusk)
     }
 
 sunBrightnessP = B.combineAsArray(sunLightInfoP, time.eachSecondE)
