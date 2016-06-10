@@ -10,11 +10,10 @@ suncalc = require "suncalc"
 parseTime = (str) -> 
   moment(str + " +0000", "h:mm:ss A Z")
 
-ONE_HOUR = 3600 * 1000
 LIGHT = 255
 DARK = 0
 
-sunLightInfoP = B.once().concat(B.interval(ONE_HOUR))
+sunLightInfoP = B.once().concat(B.interval(time.oneHour))
   .map(suncalc.getTimes(new Date(), config.latitude, config.longitude))
   .toProperty()
   .skipDuplicates(R.equals)
