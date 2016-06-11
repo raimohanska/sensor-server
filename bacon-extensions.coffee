@@ -15,15 +15,19 @@ B.range = (start, end, interval) ->
 B.Observable :: withLatestFrom = (other, f) ->
   other.sampledBy this, (v2, v1) -> f(v1, v2)
 
-B.Observable :: repeatBy = (keyF, interval, throttle = time.oneSecond) ->
+B.Observable :: repeatBy = (keyF, interval, {throttle, maxRepeat}) ->
   src = this
   src
     .flatMap (event) ->
       key = keyF(event)
-      B.once(event)
+      keyEvents = B.once(event)
         .concat(B.interval(interval, event)
           .takeUntil(src.filter((e) -> keyF(e) == key)))
-      .throttle(throttle)
+      if throttle?
+        keyEvents = keyEvents.throttle(throttle)
+      if maxRepeat?
+        keyEvents = keyEvents.takeUntil(Bacon.later(maxRepeat))
+      keyEvents
 
 B.Observable :: repeatLatest = (interval) ->
   this.flatMapLatest (value) ->
