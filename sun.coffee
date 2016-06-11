@@ -14,7 +14,7 @@ LIGHT = 255
 DARK = 0
 
 sunLightInfoP = B.once().concat(B.interval(time.oneHour))
-  .map(suncalc.getTimes(new Date(), config.latitude, config.longitude))
+  .map(-> suncalc.getTimes(new Date(), config.latitude, config.longitude))
   .toProperty()
   .skipDuplicates(R.equals)
   .map (sunInfo) ->
