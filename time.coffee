@@ -5,8 +5,9 @@ moment=require "moment"
 config = (require "./config")
 now = -> moment()
 oneSecond = 1000
-oneHour = 3600 * oneSecond
 oneMinute = 60 * oneSecond
+oneHour = 3600 * oneSecond
+oneDay = 24 * oneHour
 eachSecondE = B.interval(1000).map(now)
 eachMinuteE = eachSecondE.filter((time) -> time.seconds() == 0)
 eachHourE = eachMinuteE.filter((time) -> time.minutes() == 0)
@@ -19,5 +20,5 @@ module.exports = {
   now,
   eachSecondE, eachMinuteE, eachHourE, midnightE,
   hourOfDayP,
-  oneHour, oneMinute, oneSecond,
+  oneDay, oneHour, oneMinute, oneSecond,
   formatDuration }
