@@ -26,7 +26,7 @@ B.Observable :: repeatBy = (keyF, interval, {throttle, maxRepeat}) ->
       if throttle?
         keyEvents = keyEvents.throttle(throttle)
       if maxRepeat?
-        keyEvents = keyEvents.takeUntil(Bacon.later(maxRepeat))
+        keyEvents = keyEvents.takeUntil(B.later(maxRepeat))
       keyEvents
 
 B.Observable :: repeatLatest = (interval) ->
