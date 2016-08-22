@@ -21,7 +21,7 @@ inactiveE = (location, throttle = time.oneHour) ->
 
 motionStartingInDarkP = (location, darkP) ->
   motionStartE(location).filter(darkP) # liike alkaa hämärässä
-    .flatMapLatest(-> B.once(true).concat(motion.motionEndE(location).map(false)))
+    .flatMapLatest(-> B.once(true).concat(motionEndE(location).map(false)))
     .toProperty(false)
 
 module.exports = {occupiedP, motionStartE, motionEndE, motionP, inactiveE, motionStartingInDarkP}
