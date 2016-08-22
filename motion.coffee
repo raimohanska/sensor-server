@@ -19,4 +19,9 @@ inactiveE = (location, throttle = time.oneHour) ->
     .filter((x) -> !x)
     .map(location + " unoccupied for " + time.formatDuration(throttle))
 
-module.exports = {occupiedP, motionStartE, motionEndE, motionP, inactiveE}
+motionStartingInDarkP = (location, darkP) ->
+  motionStartE(location).filter(darkP) # liike alkaa hämärässä
+    .flatMapLatest(-> B.once(true).concat(motion.motionEndE(location).map(false)))
+    .toProperty(false)
+
+module.exports = {occupiedP, motionStartE, motionEndE, motionP, inactiveE, motionStartingInDarkP}
