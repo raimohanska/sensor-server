@@ -45,8 +45,9 @@ missingDevicesP = timeSinceSeenDevicesP
   .log "missing devices"
 
 missingDevicesP.filter(".length").forEach (missing) ->
-  text = "Sensor devices missing: " + missing.join(",")
-  mail.send text, text
+  names = missing.map((d) -> devices[d]?.name || d)
+  text = "Following devices seem to have gone offline: " + names.join(",")
+  mail.send(missing.length + " devices offline", text)
 
 mapValues = (f) -> (obj) ->
   R.fromPairs(R.toPairs(obj).map(([key, value]) -> [key, f(value)]))
