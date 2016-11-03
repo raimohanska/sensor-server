@@ -11,6 +11,7 @@ store = require("./store")("latest-values")
 sensors = require "./sensors"
 
 missingDeviceThreshold = time.hours * 6
+started = time.now()
 
 deviceSeenE = B.Bus()
 
@@ -54,10 +55,7 @@ filterValues = (f) -> (obj) ->
   R.fromPairs(R.toPairs(obj).filter(([key, value]) -> f(value)))
 
 age = (t) ->
-  if t
-    time.now().diff(t)
-  else
-    null
+  time.now().diff(t || started)
 
 devicesStatusP.throttle(time.oneMinute * 10).log("deviceStatus")
 
