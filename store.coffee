@@ -6,7 +6,7 @@ storage = (name) ->
   filename = name + ".json"
   storedValuesP = B.fromNodeCallback(fs, "readFile", filename, "utf-8")
       .mapError("{}")
-      .map(JSON.parse)
+      .flatMap(B.try(JSON.parse))
       .toProperty()
   write = (key, value) ->
     storedValuesP
