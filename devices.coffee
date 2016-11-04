@@ -25,7 +25,7 @@ devicesStatusP = B.update(
 
 timeSinceSeenDevicesP = devicesStatusP.sampledBy(time.eachSecondE)
   .toProperty()
-  .map (statii) -> mapValues((value) -> age(value.lastSeen))(statii)
+  .map (statii) -> mapValues((value) -> calcAge(value.lastSeen))(statii)
 
 timeSinceSeenDevicesP
   .sample(time.oneHour)
@@ -38,7 +38,7 @@ timeSinceSeenDevicesP
 missingDevicesP = timeSinceSeenDevicesP
   .map((statii) ->
     ages = mapValues((age) ->
-      age > missingDeviceThreshold
+      (age || calcAge(started)) > missingDeviceThreshold
     )(statii)
     filtered=filterValues(R.identity)(ages)
     R.keys(filtered))
@@ -55,8 +55,8 @@ mapValues = (f) -> (obj) ->
 filterValues = (f) -> (obj) ->
   R.fromPairs(R.toPairs(obj).filter(([key, value]) -> f(value)))
 
-age = (t) ->
-  time.now().diff(t || started)
+calcAge = (t) -> if t? 
+  time.now().diff(t)
 
 devicesStatusP.throttle(time.oneMinute * 10).log("deviceStatus")
 
