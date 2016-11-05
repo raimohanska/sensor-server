@@ -8,7 +8,7 @@ motionP = (location) ->
 motionStartE = (location) -> motionP(location).changes().filter((x) -> x)
 motionEndE = (location) -> motionP(location).changes().filter((x) -> !x)
 
-occupiedP = (location, throttle = time.oneMinute * 30) ->
+occupiedP = (location, throttle = time.minutes(30)) ->
     motionStartE(location)
       .flatMapLatest (x) -> B.once(x).concat(motionEndE(location).delay(throttle).map(false))
       .toProperty(0).skipDuplicates()

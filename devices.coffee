@@ -57,7 +57,7 @@ filterValues = (f) -> (obj) ->
 calcAge = (t) -> if t? 
   time.now().diff(t)
 
-devicesStatusP.throttle(time.oneMinute * 10).log("deviceStatus")
+devicesStatusP.throttle(time.minutes(10)).log("deviceStatus")
 
 reportDeviceSeen = (key) -> if key?
   deviceSeenE.push(key)

@@ -88,7 +88,7 @@ booleanToBri = (b) ->
   else
     if b then 255 else 0
 
-fadeLight = (query) -> (bri, duration = time.oneSecond * 10) ->
+fadeLight = (query) -> (bri, duration = time.seconds(10)) ->
   fullLightStateP.take(1).forEach (lights) ->
     lights = findByQuery query, R.values(lights)
     if lights.length > 0
@@ -121,7 +121,7 @@ tcpDevices.forEach ([lightId, deviceId]) ->
       .map(lightStateP(lightId))
       .forEach(sendState)
 
-controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
+controlLight = (query, controlP, manualOverridePeriod = time.hours(3)) ->
   manualOverrideE = lightStateP(query)
     .map(".value")
     .withLatestFrom(controlP, (newValue, expectedValue) ->
@@ -130,7 +130,7 @@ controlLight = (query, controlP, manualOverridePeriod = time.oneHour * 3) ->
         true
       else
         false)
-    .debounce(time.oneSecond * 10)
+    .debounce(time.seconds(10))
     .skipDuplicates()
     .filter(B._.id)
 
