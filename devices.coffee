@@ -10,7 +10,6 @@ devices = (require "./config").devices || {}
 initialDevicesStatii = R.fromPairs(R.keys(devices).map((key) -> [key, {}]))
 sensors = require "./sensors"
 
-missingDeviceThreshold = time.oneHour * 6
 started = time.now()
 
 deviceSeenE = B.Bus()
@@ -37,8 +36,8 @@ timeSinceSeenDevicesP
 
 missingDevicesP = timeSinceSeenDevicesP
   .map((statii) ->
-    ages = mapValues((age) ->
-      (age || calcAge(started)) > missingDeviceThreshold
+    ages = mapValues((age, key) ->
+      (age || calcAge(started)) > devices[key]?.offlineDelay
     )(statii)
     filtered=filterValues(R.identity)(ages)
     R.keys(filtered))
@@ -50,10 +49,10 @@ missingDevicesP.filter(".length").forEach (missing) ->
   mail.send(missing.length + " devices offline", text)
 
 mapValues = (f) -> (obj) ->
-  R.fromPairs(R.toPairs(obj).map(([key, value]) -> [key, f(value)]))
+  R.fromPairs(R.toPairs(obj).map(([key, value]) -> [key, f(value, key)]))
 
 filterValues = (f) -> (obj) ->
-  R.fromPairs(R.toPairs(obj).filter(([key, value]) -> f(value)))
+  R.fromPairs(R.toPairs(obj).filter(([key, value]) -> f(value, key)))
 
 calcAge = (t) -> if t? 
   time.now().diff(t)
