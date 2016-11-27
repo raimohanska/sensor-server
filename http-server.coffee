@@ -48,7 +48,10 @@ io.on "connection", (socket) ->
       else
         log "Sourcing server logged in for site " + login.siteId + " at " + socket.conn.remoteAddress
         socket.emit "login-success", "welcome"
-        site.sensors.sensorE.forEach (event) ->
+        discoE = Bacon.fromEvent(socket, "disconnect")
+        discoE.forEach ->
+          log "Sourcing server disconnected for site " + login.siteId + " at " + socket.conn.remoteAddress
+        site.sensors.sensorE.takeUntil(discoE).forEach (event) ->
           socket.emit "sensor-event", event
 
 module.exports = { sensorE }
