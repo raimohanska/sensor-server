@@ -22,7 +22,7 @@ siteConfigs = R.toPairs(config.sites)
 mail = require "./mail"
 
 siteConfigs.forEach ([siteId, siteConfig]) ->
-  site = { 
+  site = {
     config: siteConfig
     time: require("./time")
     sun: require("./sun")
