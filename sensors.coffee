@@ -2,23 +2,35 @@ R = require "ramda"
 log = require "./log"
 B=require "baconjs"
 validate = require "./validate"
-mapProperties = require "./property-mapping"
-config = require "./config"
 
-eventBus = B.Bus()
+initSite = (site) ->
+  devices = site.config.devices || {}
 
-sensorE = eventBus
-  .flatMap(validate)
-  .map(mapProperties)
+  mapProperties = (event) ->
+    device = devices[event.device]
+    if device?
+      properties = device.properties || {}
+      sensorProperties = device.sensors?[event.sensor] || {}
+      R.mergeAll([event, properties, sensorProperties])
+    else
+      event
 
-pushEvent = eventBus.push.bind(eventBus)
+  eventBus = B.Bus()
 
-sensorP = (props) -> sensorE.filter(R.whereEq props).map(".value").toProperty()
+  sensorE = eventBus
+    .flatMap(validate)
+    .map(mapProperties)
 
-sourceHash = (event) -> R.join('')(R.chain(
-  (([k,v]) ->
-    if k == "value" || typeof v == "object" then [] else [k+v]
-  ),
-  R.toPairs(event)))
+  pushEvent = eventBus.push.bind(eventBus)
 
-module.exports = { sensorE, sensorP, pushEvent, sourceHash }
+  sensorP = (props) -> sensorE.filter(R.whereEq props).map(".value").toProperty()
+
+  sourceHash = (event) -> R.join('')(R.chain(
+    (([k,v]) ->
+      if k == "value" || typeof v == "object" then [] else [k+v]
+    ),
+    R.toPairs(event)))
+
+  { sensorE, sensorP, pushEvent, sourceHash }
+
+module.exports = { initSite }

@@ -7,40 +7,46 @@ time = require "./time"
 log "Starting"
 B=require "baconjs"
 require "./bacon-extensions"
-KeenSender = require "./keen-sender"
 HttpServer = require "./http-server"
-Influx = require "./influx-store"
+influx = require "./influx-store"
 validate = require "./validate"
-mapProperties = require "./property-mapping"
-config = require "./config"
+configFile = process.env.SENSOR_SERVER_CONFIG || "./config"
+config = require configFile
 sensors = require "./sensors"
 tcpServer = require "./tcp-server"
+houm = require "./houm"
+devices = require "./devices"
+sites = require "./sites"
+motion = require "./motion"
+siteConfigs = R.toPairs(config.sites)
+mail = require "./mail"
 
-sensorE = sensors.sensorE
-
-sensorE
-  .onValue(KeenSender.send)
-
-sensorE
-  .repeatBy(sensors.sourceHash, time.oneHour, { throttle: time.oneSecond, maxRepeat: time.oneDay})
-  .onValue(Influx.store)
-
-sensorE
-  .onError (error) -> log("ERROR: " + error)
-
-if config.init
-  mods = {
-    time: require("./time"),
-    sun: require("./sun"),
-    motion: require("./motion"),
-    sensors,
-    log,
-    R,
-    B,
-    devices: tcpServer
+siteConfigs.forEach ([siteId, siteConfig]) ->
+  site = { 
+    config: siteConfig
+    time: require("./time")
+    sun: require("./sun")
+    log
+    R
+    B
   }
 
-  if config.houm
-    mods.houm = require "./houm"
+  site.mail = mail.initSite site
+  site.sensors = sensors.initSite site
+  site.devices = devices.initSite site
+  site.houm = houm.initSite site
+  site.motion = motion.initSite site
+  site.influx = influx.initSite site
 
-  config.init mods
+  sites.registerSite(siteId, site)
+
+  sensorE = site.sensors.sensorE
+  sensorE
+    .repeatBy(site.sensors.sourceHash, time.oneHour, { throttle: time.oneSecond, maxRepeat: time.oneDay})
+    .onValue(site.influx.store)
+
+  sensorE
+    .onError (error) -> log("ERROR: " + error)
+
+  if siteConfig.init
+    siteConfig.init site

@@ -4,9 +4,7 @@ R = require 'ramda'
 log = require "./log"
 carrier = require "carrier"
 config = require('./config').tcp
-sensors = require './sensors'
-devices = require './devices'
-
+sites = require "./sites"
 port = config?.port
 
 addSocketE = B.Bus()
@@ -54,12 +52,12 @@ if port?
   log "TCP listening on port", port
 
 messageFromDeviceE
-  .filter((m) -> m.value?)
-  .onValue(sensors.pushEvent)
-
-messageFromDeviceE
-  .map(".device")
-  .onValue(devices.reportDeviceSeen)
+  .onValue (message) ->
+    site = sites.findSiteByEvent message
+    if site?
+      site.devices.reportDeviceSeen message.device
+      if message.value?
+        site.sensors.pushEvent(message)
 
 sendToDevice = (id) -> (msg) ->
   devicesP.take(1).onValue (devices) ->

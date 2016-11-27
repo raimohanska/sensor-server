@@ -3,8 +3,8 @@ app = express()
 http = require('http').Server(app)
 log = require "./log"
 bodyParser = require "body-parser"
-sensors = require "./sensors"
 devices = require "./devices"
+sites = require "./sites"
 Bacon = require "baconjs"
 
 port = process.env.PORT || 5080
@@ -25,10 +25,11 @@ app.post "/event", jsonParser, (req, res) ->
 http.listen port, ->
   log "HTTP listening on port", port
 
-sensorE.forEach sensors.pushEvent
-
-sensorE.map(".device").onValue(devices.reportDeviceSeen)
-
-sensorE.map(JSON.stringify).log("HTTP sensor event")
+sensorE.onValue (event) ->
+  site = sites.findSiteByEvent event
+  if site?
+    log "HTTP sersor event", JSON.stringify(event)
+    site.devices.reportDeviceSeen event.device
+    site.sensors.pushEvent event
 
 module.exports = { sensorE }

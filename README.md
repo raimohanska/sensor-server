@@ -4,7 +4,7 @@ Server platform for collecting events from home automation sensors, transforming
 
 Supports event collection through TCP and HTTP POST. The idea is that the sensors connect to the server and send data.
 
-Supports sending data over to Keen.IO and storing it into an InfluxDB database.
+Supports storing events into an InfluxDB database.
 
 Has some APIs that allow you to use Bacon.js for transforming and combining your data and controlling your home.
 
@@ -70,37 +70,36 @@ Install
 
     npm install
 
-Create the file `config.coffee` in this  directory and add your Keen.IO and InfluxDB configuration there. Like this:
+Create the file `config.coffee` in this  directory and add InfluxDB configuration there. Like this:
 
 ```coffeescript
 module.exports = {
-  keen:
-    projectId: "YOURPROJECTIT"
-    writeKey: "YOURWRITEKEY"
-  influx:
-    database: "mydb"
-    username: ""
-    password: ""
-    protocol: "http"
-    host: "localhost"
-    port: 8086
-  devices:
-    "sensor1":
-      properties: { location: "livingroom" }
-    "raimo-unit-1":
-      properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31"}
-  latitude: 60.2695100
-  longitude: 25.9557500
   tcp:
     port: 8001
-  houm:
-    siteKey: "my_site_key"
-  init: ({log, time, sun, houm, sensors, motion, R, B}) ->
-    nightTimeP = time.hourOfDayP.map((hours) -> hours <= 6 || hours >= 21)
-    nightTimeP.log("nighttime")
+  sites:
+    default:
+      influx:
+        database: "mydb"
+        username: ""
+        password: ""
+        protocol: "http"
+        host: "localhost"
+        port: 8086
+      devices:
+        "sensor1":
+          properties: { location: "livingroom" }
+        "raimo-unit-1":
+          properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31"}
+      latitude: 60.2695100
+      longitude: 25.9557500
+      houm:
+        siteKey: "my_site_key"
+      init: ({log, time, sun, houm, sensors, motion, R, B}) ->
+        nightTimeP = time.hourOfDayP.map((hours) -> hours <= 6 || hours >= 21)
+        nightTimeP.log("nighttime")
 ```
 
-You can omit any of the `keen`, `influx` and `propertyMapping` sections if you don't need one of them.
+You can omit any of the `influx` and `propertyMapping` sections if you don't need one of them.
 
 Then run:
 
@@ -109,10 +108,6 @@ Then run:
 Run, restart on file changes
 
     npm run watch
-
-Test it without actually sending to Keen
-
-    dont_send=true npm run watch
 
 ### Devices
 
