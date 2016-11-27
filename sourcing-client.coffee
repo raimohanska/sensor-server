@@ -4,7 +4,7 @@ B=require "baconjs"
 io = require('socket.io-client')
 
 initSite = (site) ->
-  sources = site.config.sourceSites || []
+  sources = site.config.sourceSites || []
   sources.forEach (sourceSite) ->
     log "sourcing from", sourceSite
     socket = io(sourceSite.url)
