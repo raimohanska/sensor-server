@@ -11,6 +11,9 @@ initSite = (site) ->
     socket.on "connect", ->
       log "Connected to source server", sourceSite.url
       socket.emit "login", { siteId: sourceSite.siteId, siteKey: sourceSite.siteKey }
+    socket.on "disconnect", ->
+      log "Disconnected from source server", sourceSite.url
+      socket.emit "login", { siteId: sourceSite.siteId, siteKey: sourceSite.siteKey }
     socket.on "login-error", (error) ->
       log "Error logging into source server " + sourceSite.url + ":" + error
     socket.on "login-success", ->
