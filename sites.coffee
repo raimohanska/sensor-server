@@ -1,7 +1,7 @@
 B = require 'baconjs'
 R = require 'ramda'
 log = require "./log"
-config = require "./config"
+config = require "./read-config"
 
 sites = {}
 

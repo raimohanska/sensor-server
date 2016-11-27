@@ -10,8 +10,7 @@ require "./bacon-extensions"
 HttpServer = require "./http-server"
 influx = require "./influx-store"
 validate = require "./validate"
-configFile = process.env.SENSOR_SERVER_CONFIG || "./config"
-config = require configFile
+config = require "./read-config"
 sensors = require "./sensors"
 tcpServer = require "./tcp-server"
 houm = require "./houm"
@@ -20,9 +19,11 @@ sites = require "./sites"
 motion = require "./motion"
 siteConfigs = R.toPairs(config.sites)
 mail = require "./mail"
+sourcing = require "./sourcing-client"
 
 siteConfigs.forEach ([siteId, siteConfig]) ->
   site = {
+    id: siteId
     config: siteConfig
     time: require("./time")
     sun: require("./sun")
@@ -47,6 +48,8 @@ siteConfigs.forEach ([siteId, siteConfig]) ->
 
   sensorE
     .onError (error) -> log("ERROR: " + error)
+
+  sourcing.initSite site
 
   if siteConfig.init
     siteConfig.init site

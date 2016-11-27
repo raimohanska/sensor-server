@@ -3,7 +3,7 @@ B = require 'baconjs'
 R = require 'ramda'
 log = require "./log"
 carrier = require "carrier"
-config = require('./config').tcp
+config = require('./read-config').tcp
 sites = require "./sites"
 port = config?.port
 
