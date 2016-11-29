@@ -20,18 +20,19 @@ motion = require "./motion"
 siteConfigs = R.toPairs(config.sites)
 mail = require "./mail"
 sourcing = require "./sourcing-client"
+sun = require("./sun")
 
 siteConfigs.forEach ([siteId, siteConfig]) ->
   site = {
     id: siteId
     config: siteConfig
     time: require("./time")
-    sun: require("./sun")
     log
     R
     B
   }
 
+  site.sun = sun.initSite site
   site.mail = mail.initSite site
   site.sensors = sensors.initSite site
   site.devices = devices.initSite site
