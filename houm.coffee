@@ -124,6 +124,7 @@ initSite = (site) ->
       tcpServer.deviceConnectedE
         .filter((id) -> id == deviceId)
         .map(lightStateP(lightId))
+        .delay(1000)
         .forEach(sendState)
 
   controlLight = (query, controlP, manualOverridePeriod = time.hours(3)) ->
