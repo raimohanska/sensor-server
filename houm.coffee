@@ -121,6 +121,7 @@ initSite = (site) ->
         log "send light state to tcp device " + deviceId + ": " + JSON.stringify(state)
         tcpServer.sendToDevice(deviceId)(state)
       lightStateP(lightId).forEach(sendState)
+      lightStateP(lightId).debounce(2000).forEach(sendState)
       tcpServer.deviceConnectedE
         .filter((id) -> id == deviceId)
         .map(lightStateP(lightId))
