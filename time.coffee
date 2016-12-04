@@ -18,7 +18,7 @@ eachHourE = eachMinuteE.filter((t) -> t.minutes() == 0)
 midnightE = eachHourE.filter((t) -> t.hours() == 0)
 hourOfDayP = eachHourE.toProperty(0).map(now).map(".hours").toProperty().skipDuplicates()
 dayOfWeekP = eachHourE.map(currentWeekday).toProperty(currentWeekday()).skipDuplicates()
-weekendP = dayOfWeekP.map((day) -> day >= 6).skipDuplicates()
+weekendP = dayOfWeekP.map((day) -> day == 0 or day == 6).skipDuplicates()
 todayAt = (hour, minute) -> now().hour(hour).minute(minute).second(0)
 formatDuration = (millis) -> moment.duration(millis, 'milliseconds').humanize()
 
@@ -31,5 +31,5 @@ module.exports = {
   formatDuration,
   todayAt,
   dayOfWeekP, weekendP,
-  monday:1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 7
+  sunday: 0, monday:1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6
 }
