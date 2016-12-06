@@ -27,6 +27,7 @@ siteConfigs.forEach ([siteId, siteConfig]) ->
     id: siteId
     config: siteConfig
     time: require("./time")
+    curve: require("./curve")
     log
     R
     B
