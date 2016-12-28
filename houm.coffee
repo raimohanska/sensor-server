@@ -147,6 +147,7 @@ initSite = (site) ->
       .log("manual override active for " + query)
 
     controlP.filter(manualOverrideP.not()).forEach(setLight query)
+    manualOverrideP.changes().filter((x) -> !x).map(controlP).forEach(setLight query)
 
   quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
