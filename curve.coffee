@@ -44,22 +44,23 @@ Curve = (points) ->
     periodStart = prevPoint.time.toDate().getTime()
     periodLength = nextPoint.time.toDate().getTime() - periodStart
     periodOffset = t.toDate().getTime() - periodStart
-    prevPoint.value + (nextPoint.value - prevPoint.value) * periodOffset / periodLength
+    Math.round(prevPoint.value + (nextPoint.value - prevPoint.value) * periodOffset / periodLength)
 
 Curve.curveProperty = (p) ->
   B.combineTemplate({
     curve: p
     time: time.eachSecondE
-  }).map(({curve, time}) -> Math.round(Curve(curve)(time)))
+  }).map(({curve, time}) -> Curve(curve)(time))
     .skipDuplicates()
 
 exampleCurve = Curve([
-  { time: "8:00", value: 0 }
-  { time: "8:30", value: 50 }
-  { time: "20:00", value: 50 }
-  { time: "21:00", value: 0 }
+    { time: "0:00", value: 0 }
+    { time: "15:00", value: 0 }
+    { time: "17:00", value: 255 }
+    { time: "19:00", value: 255 }
+    { time: "19:15", value: 0 }
 ])
 
-#console.log exampleCurve(time.todayAt("20:30"))
+#console.log exampleCurve(time.todayAt("16:59:59"))
 
 module.exports = Curve
