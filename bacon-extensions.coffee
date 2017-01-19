@@ -46,10 +46,10 @@ B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
   diff = (to - from) / fadeStep
   steps = Math.floor(Math.abs(diff))
   if from == undefined or steps == 0
-    log "set to", to
+    #log "set to", to
     B.once(to)
   else
-    log "fade from", from, "to", to, "in", steps, " steps"
+    #log "fade from", from, "to", to, "in", steps, " steps"
     B.range(0, steps, fadeStepTime)
       .map (step) ->
         scale(step + 1, 0, steps, from, to)
