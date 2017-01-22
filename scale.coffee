@@ -1,9 +1,8 @@
 scale = (value, inMin, inMax, outMin, outMax) ->
-  if value < inMin
-    outMin
-  else if value > inMax
-    outMax
-  else
-    outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin)
+  scaled = outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin)
+  limitBetween(scaled, outMin, outMax)
+
+limitBetween = (value, a, b) ->
+  Math.max(Math.min(value, Math.max(a, b)), Math.min(a, b))
 
 module.exports = scale
