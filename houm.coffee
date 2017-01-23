@@ -131,12 +131,12 @@ initSite = (site) ->
   controlLight = (query, controlP, manualOverridePeriod = time.hours(3)) ->
     manualOverrideE = lightStateP(query)
       .map(".value")
-      .withLatestFrom(controlP, (newValue, expectedValue) ->
-        if newValue != booleanToBri(expectedValue)
-          #log "Manual override for " + query + " because " + newValue + " <> " + expectedValue
-          true
-        else
-          false)
+      .withLatestFrom(controlP.slidingWindow(3), (newValue, expectedValues) ->
+        console.log(expectedValues)
+        found = false
+        for v in expectedValues
+          found = true if newValue == booleanToBri(v)
+        !found)
       .skipDuplicates()
       .filter(B._.id)
 
