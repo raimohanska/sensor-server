@@ -137,7 +137,6 @@ initSite = (site) ->
           true
         else
           false)
-      .debounce(time.seconds(10))
       .skipDuplicates()
       .filter(B._.id)
 
