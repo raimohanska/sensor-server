@@ -3,6 +3,8 @@
 util = require "util"
 B = require('baconjs')
 R = require('ramda')
+L = require 'partial.lenses'
+scale = require './scale'
 time = require "./time"
 moment = require 'moment'
 io = require('socket.io-client')
@@ -18,7 +20,7 @@ initSite = (site) ->
   houmSocket = io('http://houmi.herokuapp.com')
   houmConnectE = B.fromEvent(houmSocket, "connect")
   houmDisconnectE = B.fromEvent(houmSocket, "disconnect")
-  tcpDevices = R.toPairs(siteConfig.devices).map ([deviceId, {properties}]) -> [properties?.lightId, deviceId]
+  tcpDevices = R.toPairs(siteConfig.devices).map ([deviceId, {properties}]) -> { deviceId, properties}
   houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
     .map(JSON.parse)
     .map(".lights")
@@ -115,11 +117,14 @@ initSite = (site) ->
       else
         log "ERROR: light", query, " not found"
 
-  tcpDevices.forEach ([lightId, deviceId]) ->
+  tcpDevices.forEach ({deviceId, properties}) ->
+    lightId = properties?.lightId
     if lightId
       sendState = (state) ->
-        log "send light state to tcp device " + deviceId + ": " + JSON.stringify(state)
-        tcpServer.sendToDevice(deviceId)(state)
+        maxBri = properties.maxBri || 255
+        mappedState = L.modify(L.prop("value"), ((bri) => Math.round(scale(bri, 0, 255, 0, maxBri))), state)
+        log "send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + state.value + " to " + mappedState.value
+        tcpServer.sendToDevice(deviceId)(mappedState)
       lightStateP(lightId).forEach(sendState)
       lightStateP(lightId).debounce(2000).forEach(sendState)
       tcpServer.deviceConnectedE
