@@ -12,6 +12,14 @@ log = (msg...) -> console.log new Date().toString(), msg...
 rp = require('request-promise')
 tcpServer = require './tcp-server'
 
+quadraticBrightness = (bri, max) -> Math.ceil(bri * bri / (max || 255))
+booleanToBri = (b) -> 
+  if typeof b == "number"
+    b
+  else
+    if b then 255 else 0
+
+
 initSite = (site) ->
   siteConfig = site.config
   houmConfig = siteConfig.houm
@@ -89,12 +97,6 @@ initSite = (site) ->
       else
         log "ERROR: light", query, " not found"
 
-  booleanToBri = (b) -> 
-    if typeof b == "number"
-      b
-    else
-      if b then 255 else 0
-
   fadeLight = (query) -> (bri, duration = time.seconds(10)) ->
     fullLightStateP.take(1).forEach (lights) ->
       lights = findByQuery query, R.values(lights)
@@ -121,8 +123,12 @@ initSite = (site) ->
     lightId = properties?.lightId
     if lightId
       sendState = (state) ->
-        maxBri = properties.maxBri || 255
-        mappedState = L.modify(L.prop("value"), ((bri) => Math.round(scale(bri, 0, 255, 0, maxBri))), state)
+        transform = (bri) => 
+          max = properties.brightness?.max || 255
+          scaled = Math.round(scale(bri, 0, 255, 0, max))
+          if properties.brightness?.quadratic then quadraticBrightness(scaled, max) else scaled
+
+        mappedState = L.modify(L.prop("value"), transform, state)
         log "send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + state.value + " to " + mappedState.value
         tcpServer.sendToDevice(deviceId)(mappedState)
       lightStateP(lightId).forEach(sendState)
@@ -153,7 +159,6 @@ initSite = (site) ->
     controlP.filter(manualOverrideP.not()).forEach(setLight query)
     manualOverrideP.changes().filter((x) -> !x).map(controlP).forEach(setLight query)
 
-  quadraticBrightness = (bri) -> Math.ceil(bri * bri / 255)
 
   findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
   findById = (id, lights) -> R.find(((light) -> light.lightId == id), lights)
@@ -166,4 +171,4 @@ initSite = (site) ->
   }
   siteApi
 
-module.exports = { initSite }
+module.exports = { initSite, quadraticBrightness, booleanToBri }
