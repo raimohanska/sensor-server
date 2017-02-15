@@ -1,3 +1,4 @@
+R = require "ramda"
 express = require "express"
 app = express()
 http = require('http').Server(app)
@@ -14,6 +15,22 @@ port = process.env.PORT || config.http?.port || 5080
 jsonParser = bodyParser.json()
 
 sensorE = Bacon.Bus()
+
+initSite = (site) ->
+  if site.config.web? && site.config.siteKey
+    console.log "Setting up web ui for site " + site.config.siteKey
+    app.get "/site/" + site.config.siteKey + "/ui/state", (req, res) ->
+      res.setHeader('Content-Type', 'application/json')
+      res.send(JSON.stringify(site.config.web))
+    app.post "/site/" + site.config.siteKey + "/ui/values", jsonParser, (req, res) ->
+      console.log(req.body)
+      R.toPairs(req.body).forEach ([key, value]) =>
+        component = site.config.web.components
+          .find (component) => component.valueKey == key
+        event = R.merge({ value, siteKey: site.config.siteKey }, component.properties)
+        sensorE.push(event)
+
+    app.use("/site/" + site.config.siteKey + "/", express.static("client/dist"))
 
 app.post "/event", jsonParser, (req, res) ->
   events = if req.body instanceof Array
@@ -54,4 +71,4 @@ io.on "connection", (socket) ->
         site.sensors.sensorE.takeUntil(discoE).forEach (event) ->
           socket.emit "sensor-event", event
 
-module.exports = { sensorE }
+module.exports = { sensorE, initSite }

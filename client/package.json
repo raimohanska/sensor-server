@@ -1,0 +1,26 @@
+{
+  "name": "sensor-server-web",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+   "start": "./node_modules/.bin/webpack-dev-server --hot --inline --progress",
+   "postinstall": "webpack",
+   "watch": "webpack -d --progress --colors --watch"
+  },
+  "dependencies": {
+    "baconjs": "^0.7",
+    "babel-core": "^6.4.5",
+    "babel-loader": "^6.2.2",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "less": "^2.6.0",
+    "less-loader": "^2.2.2",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "react-hot-loader": "^1.3.0",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.13"
+  }
+}

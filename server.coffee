@@ -40,6 +40,7 @@ siteConfigs.forEach ([siteId, siteConfig]) ->
   site.houm = houm.initSite site
   site.motion = motion.initSite site
   site.influx = influx.initSite site
+  HttpServer.initSite site
 
   sites.registerSite(siteId, site)
 
