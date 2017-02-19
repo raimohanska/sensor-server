@@ -21,7 +21,8 @@ initSite = (site) ->
     console.log "Setting up web ui for site " + site.config.siteKey
     app.get "/site/" + site.config.siteKey + "/ui/state", (req, res) ->
       res.setHeader('Content-Type', 'application/json')
-      res.send(JSON.stringify(site.config.web))
+      values = R.fromPairs(site.config.web.components.map((c) -> [c.valueKey, c.defaultValue]))
+      res.send(JSON.stringify(R.merge(site.config.web, { values })))
     app.post "/site/" + site.config.siteKey + "/ui/values", jsonParser, (req, res) ->
       console.log(req.body)
       R.toPairs(req.body).forEach ([key, value]) =>
