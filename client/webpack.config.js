@@ -17,6 +17,10 @@ module.exports = {
         loader : 'style!css!less'
       },
       {
+        test: /\.css/,
+        loader : 'style!css'
+      },
+      {
         test: /\.(js|jsx|es6)$/,
         exclude: /node_modules/,
         loader: 'react-hot!babel?presets[]=react,presets[]=es2015'

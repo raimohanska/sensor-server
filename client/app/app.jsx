@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom'
 import styles from './main.less'
 import http from './http.js'
 import Bacon from 'baconjs'
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css'
 
 class App extends React.Component {
 	render () {
@@ -23,16 +25,15 @@ let SliderControl = React.createClass({
   render() {
     let { min, max, title, valueKey, setValue } = this.props
     let { value } = this.state
-    let onChange = (e) => {
-      let newValue = e.target.value
+    let onChange = (newValue) => {
       this.setState({ value: newValue })
-      let parsed = parseInt(newValue)
-      let valid = !isNaN(parsed) && (max == undefined || parsed <= max) && (min == undefined || parsed >= min)
-      if (valid)
-        setValue(valueKey, parsed)
+      setValue(valueKey, newValue)
     }
-    return (<label>{ title }
-      <input type="text" value={value} onChange={onChange}/>
+    return (<label>
+      <span className="label">{ title }</span>
+      :
+      <span className="value">{ value }</span>
+      <Slider {...{min, max, value}} onChange={onChange}/>
     </label>)
   },
   getInitialState() {
