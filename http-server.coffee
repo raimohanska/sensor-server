@@ -22,6 +22,7 @@ initSite = (site) ->
     app.get "/site/" + site.config.siteKey + "/ui/state", (req, res) ->
       res.setHeader('Content-Type', 'application/json')
       values = R.fromPairs(site.config.web.components.map((c) -> [c.valueKey, c.defaultValue]))
+      # TODO: merge current values, store values
       res.send(JSON.stringify(R.merge(site.config.web, { values })))
     app.post "/site/" + site.config.siteKey + "/ui/values", jsonParser, (req, res) ->
       console.log(req.body)
