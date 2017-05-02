@@ -140,24 +140,30 @@ initSite = (site) ->
         .forEach(sendState)
 
   controlLight = (query, controlP, manualOverridePeriod = time.hours(3)) ->
-    manualOverrideE = lightStateP(query)
+    valueDiffersFromControl = (v,c) -> v != booleanToBri(c)
+    setValueE = lightStateP(query)
       .map(".value")
-      .withLatestFrom(controlP.slidingWindow(3), (newValue, expectedValues) ->
-        console.log(expectedValues)
-        found = false
-        for v in expectedValues
-          found = true if newValue == booleanToBri(v)
-        !found)
-      .skipDuplicates()
-      .filter(B._.id)
-
+      .changes()
+    ackP = controlP.flatMapLatest((c) -> 
+      B.once(false).concat(setValueE.skipWhile((v) -> valueDiffersFromControl(v, c)).take(1).map(true))
+    ).toProperty()
+    ackP.log(query + " control ack")
+    manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest((v) ->
+      console.log "start monitoring " + query + " overrides"
+      setValueE.takeUntil(controlP.changes()).log("override event for " + query)
+    ).withLatestFrom(controlP, valueDiffersFromControl)
     manualOverrideP = manualOverrideE
-      .flatMap -> B.once(true).concat(B.later(manualOverridePeriod, false))
+      .flatMapLatest((override) -> 
+        if override
+          B.once(true).concat(B.later(manualOverridePeriod, false))
+        else
+          B.once(false))
       .toProperty(false)
+      .skipDuplicates()
       .log("manual override active for " + query)
 
     controlP.filter(manualOverrideP.not()).forEach(setLight query)
-    manualOverrideP.changes().filter((x) -> !x).map(controlP).forEach(setLight query)
+    manualOverrideP.changes().filter((x) -> !x).map(controlP).skipDuplicates().forEach(setLight query)
 
 
   findByName = (name, lights) -> R.find(((light) -> light.name.toLowerCase() == name.toLowerCase()), lights)
