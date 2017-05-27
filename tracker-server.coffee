@@ -47,6 +47,7 @@ if port?
         if not site?
           log "Site not found for tracker", serial
         else
+          log "Got tracker info from", serial
           site.sensors.pushEvent({ type: 'latitude', value: lat, serial })
           site.sensors.pushEvent({ type: 'longitude', value: lon, serial })
 
