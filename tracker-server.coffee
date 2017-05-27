@@ -12,7 +12,10 @@ parseTrackerInfo = (s) ->
   lat = s.substring(24,33)
   lon = s.substring(35,44)
   serial = s.substring(1, 17)
-  { lat: strToCoord(lat), lon: strToCoord(lon), serial }
+  speed = Number.parseFloat(s.substring(45, 50))
+  course = Number.parseFloat(s.substring(56, 62))
+  
+  { lat: strToCoord(lat), lon: strToCoord(lon), speed, course, serial, raw: s }
 
 siteBySerial = (serial) ->
   matching = (site) -> 
@@ -42,14 +45,16 @@ if port?
              .fold '', (soFar, next) -> soFar + next
       .map (str) -> '(' + str + ')'
       .map(parseTrackerInfo)
-      .onValue ({lat, lon, serial}) ->
+      .onValue ({lat, lon, speed, course, serial, raw}) ->
         site = siteBySerial(serial)
         if not site?
           log "Site not found for tracker", serial
         else
-          log "Got tracker info from", serial
+          log "Got tracker info from", serial, {lat, lon, speed, course}
           site.sensors.pushEvent({ type: 'latitude', value: lat, serial })
           site.sensors.pushEvent({ type: 'longitude', value: lon, serial })
+          site.sensors.pushEvent({ type: 'speed', value: speed, serial })
+          site.sensors.pushEvent({ type: 'course', value: course, serial })
 
   ).listen(port)
   log "Tracker Server listening on port", port
