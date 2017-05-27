@@ -21,4 +21,4 @@ findSiteByEvent = (event) ->
   else
     site
 
-module.exports = { findSiteByEvent, registerSite }
+module.exports = { findSiteByEvent, registerSite, sites }
