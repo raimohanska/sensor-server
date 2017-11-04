@@ -27,7 +27,7 @@ initSite = (site) ->
       eventBus.push(influxEvent)
       
     resultE = eventBus.flatMap (influxEvent) ->
-      B.fromNodeCallback client, "writePoint", influxEvent.key, influxEvent.fields, influxEvent.tags
+      B.fromNodeCallback client, "writePoints", [{measurement: influxEvent.key, fields: influxEvent.fields, tags: influxEvent.tags}]
     errorE = resultE.errors().mapError(B._.id)
     errorE.debounceImmediate(time.oneHour).onValue (err) ->
       log "Influx storage error: " + err.stack.split("\n")
