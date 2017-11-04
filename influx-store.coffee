@@ -2,11 +2,12 @@ log = require "./log"
 R=require "ramda"
 B=require "baconjs"
 time=require "./time"
+Influx=require "influx"
 
 initSite = (site) ->
   config = site.config.influx
   if config
-    client = (require "influx")(config)
+    client = new Influx.InfluxDB(config)
 
     log "Connecting to InfluxDB at " + config.protocol + "://" + config.host + ":" + config.port + "/" + config.database
     eventBus = B.Bus()
