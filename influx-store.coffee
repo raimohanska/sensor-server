@@ -22,12 +22,13 @@ initSite = (site) ->
           value: event.value
         }
       if event.timestamp
-        influxEvent.fields.time = new Date(event.timestamp)
+        influxEvent.timestamp = new Date(event.timestamp)
       #log "storing to InfluxDB", JSON.stringify(influxEvent)
       eventBus.push(influxEvent)
       
     resultE = eventBus.flatMap (influxEvent) ->
-      B.fromNodeCallback client, "writePoints", [{measurement: influxEvent.key, fields: influxEvent.fields, tags: influxEvent.tags}]
+      point = {measurement: influxEvent.key, fields: influxEvent.fields, tags: influxEvent.tags, timestamp: influxEvent.timestamp}
+      B.fromPromise(client.writePoints([point]))
     errorE = resultE.errors().mapError(B._.id)
     errorE.debounceImmediate(time.oneHour).onValue (err) ->
       log "Influx storage error: " + err.stack.split("\n")
