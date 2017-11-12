@@ -52,7 +52,7 @@ B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
     #log "fade from", from, "to", to, "in", steps, " steps"
     B.range(0, steps, fadeStepTime)
       .map (step) ->
-        scale(step + 1, 0, steps, from, to)
+        scale(0, steps, from, to)(step + 1)
       .concat(B.once(to))
 
 B.Property :: persist = (key, shouldLog = true) ->

@@ -125,7 +125,7 @@ initSite = (site) ->
       sendState = (state) ->
         transform = (bri) => 
           max = properties.brightness?.max || 255
-          scaled = Math.round(scale(bri, 0, 255, 0, max))
+          scaled = Math.round(scale(0, 255, 0, max)(bri))
           if properties.brightness?.quadratic then quadraticBrightness(scaled, max) else scaled
 
         mappedState = L.modify(L.prop("value"), transform, state)

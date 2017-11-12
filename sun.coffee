@@ -34,10 +34,10 @@ getSunBrightness = (time, lat, lon) ->
     DARK
   else if currentTime.isBefore(sunInfo.sunrise)
     # fading in
-    scale currentTime.unix(), sunInfo.twilightBegin.unix(), sunInfo.sunrise.unix(), 0, 255
+    scale(sunInfo.twilightBegin.unix(), sunInfo.sunrise.unix(), 0, 255)(currentTime.unix())
   else if currentTime.isAfter(sunInfo.sunset)
     # fading out
-    scale currentTime.unix(), sunInfo.sunset.unix(), sunInfo.twilightEnd.unix(), 255, 0
+    scale(sunInfo.sunset.unix(), sunInfo.twilightEnd.unix(), 255, 0)(currentTime.unix())
   else
     LIGHT
 
