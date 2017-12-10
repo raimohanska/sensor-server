@@ -28,7 +28,9 @@ initSite = (site) ->
   houmSocket = io('http://houmi.herokuapp.com')
   houmConnectE = B.fromEvent(houmSocket, "connect")
   houmDisconnectE = B.fromEvent(houmSocket, "disconnect")
-  tcpDevices = R.toPairs(siteConfig.devices).map ([deviceId, {properties}]) -> { deviceId, properties}
+  tcpDevices = R.toPairs(siteConfig.devices)
+    .map ([deviceId, {properties}]) -> { deviceId, properties}
+    .filter ({properties}) -> properties?.tcp
   houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
     .map(JSON.parse)
     .map(".lights")
