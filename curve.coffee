@@ -21,7 +21,7 @@ Array::indexWhere = (f) ->
     if f(v) then return i
   -1
 
-Curve = (points) ->
+Curve = (points, discrete) ->
   points = points.map ({time, value}) -> { time: parseTime(time), value }
   (t) ->
     nextPointIndex = points.indexWhere (p) -> p.time.isAfter(t)
@@ -41,16 +41,22 @@ Curve = (points) ->
       nextPoint = points[nextPointIndex]
       nextPoint = { time: nextPoint.time.today(), value: nextPoint.value }
 
-    periodStart = prevPoint.time.toDate().getTime()
-    periodLength = nextPoint.time.toDate().getTime() - periodStart
-    periodOffset = t.toDate().getTime() - periodStart
-    Math.round(prevPoint.value + (nextPoint.value - prevPoint.value) * periodOffset / periodLength)
+    if discrete
+      prevPoint.value
+    else
+      periodStart = prevPoint.time.toDate().getTime()
+      periodLength = nextPoint.time.toDate().getTime() - periodStart
+      periodOffset = t.toDate().getTime() - periodStart
+      Math.round(prevPoint.value + (nextPoint.value - prevPoint.value) * periodOffset / periodLength)
 
-Curve.curveProperty = (p) ->
+Curve.discreteCurveProperty = (p) ->
+  Curve.curveProperty(p, true)
+
+Curve.curveProperty = (p, discrete) ->
   B.combineTemplate({
     curve: p
     time: time.eachSecondE
-  }).map(({curve, time}) -> Curve(curve)(time))
+  }).map(({curve, time}) -> Curve(curve, discrete)(time))
     .skipDuplicates()
 
 exampleCurve = Curve([
