@@ -20,12 +20,15 @@ initSite = (site) ->
   sender.setRepeatTransmit(5)
   if site.houm
     R.values(site.config.devices)
-      .filter (d) -> d.properties?.intertechnoId && d.properties.lightId
+      .filter (d) -> d.properties?.intertechnoId >= 0 && d.properties.lightId
       .forEach (d) ->
-        brightnessP = site.houm.lightStateP(d.properties.lightId).map('.value')
+        lightId = d.properties.lightId
+        itId = d.properties.intertechnoId
+        log "Mapping light " + lightId + " to Intertechno id " + itId
+        brightnessP = site.houm.lightStateP(lightId).map('.value')
         brightnessP.forEach (bri) ->
           state = bri > 0
-          log "Intertechno " + d.properties.intertechnoId + " state=" + state
-          sender.setState d.properties.intertechnoId, state
+          log "Intertechno " + itId + " state=" + state
+          sender.setState itId, state
 
 module.exports = { initSite }
