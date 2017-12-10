@@ -22,6 +22,7 @@ siteConfigs = R.toPairs(config.sites)
 mail = require "./mail"
 sourcing = require "./sourcing-client"
 sun = require("./sun")
+intertechno = require "./intertechno"
 
 siteConfigs.forEach ([siteId, siteConfig]) ->
   site = {
@@ -41,6 +42,7 @@ siteConfigs.forEach ([siteId, siteConfig]) ->
   site.houm = houm.initSite site
   site.motion = motion.initSite site
   site.influx = influx.initSite site
+  site.intertechno = intertechno.initSite site
   HttpServer.initSite site
 
   sites.registerSite(siteId, site)
