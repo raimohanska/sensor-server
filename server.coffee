@@ -1,6 +1,8 @@
 #!/usr/bin/env coffee
 require "./polyfills.js"
 require('es6-promise').polyfill()
+mock = require "./mock"
+if mock then console.log "Mocking output"
 R = require "ramda"
 log = require "./log"
 time = require "./time"

@@ -11,6 +11,7 @@ io = require('socket.io-client')
 log = (msg...) -> console.log new Date().toString(), msg...
 rp = require('request-promise')
 tcpServer = require './tcp-server'
+mock = require "./mock"
 
 quadraticBrightness = (bri, max) -> Math.ceil(bri * bri / (max || 255))
 booleanToBri = (b) -> 
@@ -95,7 +96,8 @@ initSite = (site) ->
           else
             bri = booleanToBri(lightOn)
           log "Set", light.light, "bri="+bri, "on="+lightOn
-          houmSocket.emit('apply/light', {_id: light.lightId, on: lightOn, bri })
+          if !mock
+            houmSocket.emit('apply/light', {_id: light.lightId, on: lightOn, bri })
       else
         log "ERROR: light", query, " not found"
 

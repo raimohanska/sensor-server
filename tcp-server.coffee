@@ -6,6 +6,7 @@ carrier = require "carrier"
 config = require('./read-config').tcp
 sites = require "./sites"
 port = config?.port
+mock = require "./mock"
 
 addSocketE = B.Bus()
 removeSocketE = B.Bus()
@@ -60,6 +61,7 @@ messageFromDeviceE
         site.sensors.pushEvent(message)
 
 sendToDevice = (id) -> (msg) ->
+  if mock then return
   devicesP.take(1).onValue (devices) ->
     devices = R.filter(R.propEq('id', id), devices)
     devices.forEach (device) ->

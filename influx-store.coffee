@@ -3,10 +3,11 @@ R=require "ramda"
 B=require "baconjs"
 time=require "./time"
 Influx=require "influx"
+mock = require "./mock"
 
 initSite = (site) ->
   config = site.config.influx
-  if config
+  if config && !mock
     client = new Influx.InfluxDB(config)
 
     log "Connecting to InfluxDB at " + config.protocol + "://" + config.host + ":" + config.port + "/" + config.database
