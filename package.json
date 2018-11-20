@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "baconjs": "^0.7.75",
+    "baconjs": "^2",
     "body-parser": "^1.14.1",
     "carrier": "^0.3.0",
     "coffee-script": "^1.9",

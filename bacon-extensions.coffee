@@ -88,5 +88,5 @@ B.Property :: hasMaintainedValueForPeriod = (value, period) ->
         B.once(false).concat(B.later(period, true))
       else
         false
-    .toProperty(false)
+    .startWith(false)
     .skipDuplicates()
