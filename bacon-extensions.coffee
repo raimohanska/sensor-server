@@ -33,13 +33,14 @@ B.Observable :: repeatLatest = (interval) ->
   this.flatMapLatest (value) ->
     B.once(value).concat(B.interval(interval, value))
 
-B.Observable :: isBelowWithHysteresis = (lowLimit, highLimit) ->
-  this
-    .scan false, (prev, val) ->
+B.Property :: isBelowWithHysteresis = (lowLimit, highLimit) ->
+  state = B.combineTemplate { lowLimit, highLimit, value: this }
+  state
+    .scan false, (prev, {lowLimit, highLimit, value}) ->
       if prev
-        val < highLimit
+        value < highLimit
       else
-        val < lowLimit
+        value < lowLimit
     .skipDuplicates()
 
 B.fade = (from, to, fadeStepTime = 100, fadeStep = 0.1) ->
