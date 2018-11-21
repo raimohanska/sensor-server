@@ -17,6 +17,8 @@ quadraticBrightness = (bri, max) -> Math.ceil(bri * bri / (max || 255))
 booleanToBri = (b) -> 
   if typeof b == "number"
     b
+  else if typeof b == "string"
+    b == "true"
   else
     if b then 255 else 0
 
