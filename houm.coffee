@@ -156,7 +156,7 @@ initSite = (site) ->
     ackP.log(query + " control ack")
     manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest((v) ->
       console.log "start monitoring " + query + " overrides"
-      setValueE.takeUntil(controlP.changes()).log("override event for " + query)
+      setValueE.takeUntil(controlP.changes())
     ).withLatestFrom(controlP, valueDiffersFromControl)
     manualOverrideP = manualOverrideE
       .flatMapLatest((override) -> 
