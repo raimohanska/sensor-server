@@ -19,6 +19,7 @@
     "influx": "^5.0.7",
     "mailgun-js": "^0.7.14",
     "moment": "^2.11.0",
+    "node-intertechno-sender": "0.0.4",
     "partial.lenses": "^3",
     "ramda": "^0.19",
     "request-promise": "^1.0.2",
