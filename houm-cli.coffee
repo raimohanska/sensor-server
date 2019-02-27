@@ -1,5 +1,5 @@
 #! /usr/bin/env coffee
-houm = require "./houm"
+houm = require "./houm3"
 siteKey = process.env.HOUMIO_SITEKEY
 args = process.argv
 cmd = args[2]
@@ -11,7 +11,7 @@ exit = ->
 doHoum = (f) ->
   site = {
     config: {
-      houm: { siteKey }
+      houm3: { siteKey }
     }
   }
   f(houm.initSite site)

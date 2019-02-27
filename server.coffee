@@ -17,6 +17,7 @@ sensors = require "./sensors"
 tcpServer = require "./tcp-server"
 trackerServer = require "./tracker-server.coffee"
 houm = require "./houm"
+houm3 = require "./houm3"
 devices = require "./devices"
 sites = require "./sites"
 motion = require "./motion"
@@ -41,7 +42,7 @@ siteConfigs.forEach ([siteId, siteConfig]) ->
   site.mail = mail.initSite site
   site.sensors = sensors.initSite site
   site.devices = devices.initSite site
-  site.houm = houm.initSite site
+  site.houm = houm3.initSite(site) || houm.initSite(site)
   site.motion = motion.initSite site
   site.influx = influx.initSite site
   site.intertechno = intertechno.initSite site
