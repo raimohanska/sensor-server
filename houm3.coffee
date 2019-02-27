@@ -202,5 +202,3 @@ initSite = (site) ->
   siteApi
 
 module.exports = { initSite, quadraticBrightness, booleanToBri }
-
-initSite(testSite)
