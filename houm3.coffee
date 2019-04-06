@@ -58,7 +58,7 @@ initSite = (site) ->
   B.fromEvent(houmSocket, 'noSuchSiteKey').log("HOUM site not found by key")
   lightE = B.fromEvent(houmSocket, "site")
     .map(".data.devices")
-    .map((devices) -> devices.map((d) -> {id: d.id, bri: if d.state.on then d.state.bri||0 else 0 }))
+    .map((devices) -> devices.map((d) -> {id: d.id, bri: if d.state.on then (if (d.state.bri != undefined) then d.state.bri else 255) else 0 }))
     .diff([], R.flip(R.difference))
     .changes()
     .skip(1)
