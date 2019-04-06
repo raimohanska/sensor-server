@@ -16,7 +16,7 @@ doHoum = (f) ->
   }
   f(houm.initSite site)
 if !siteKey?
-  fail "HOUM_SITEKEY environment variable missing"
+  fail "HOUMIO_SITEKEY environment variable missing"
 
 if cmd == "set" && args.length == 5
   light = args[3]
@@ -27,6 +27,7 @@ if cmd == "set" && args.length == 5
       .onValue(exit)
     houm.setLight(light)(targetValue)
 else
-  fail("""
-Usage: houm-cli set [light] [value]
-""")
+  doHoum (houm) ->
+    fail("""
+  Usage: houm-cli set [light] [value]
+  """)
