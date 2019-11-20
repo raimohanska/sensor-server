@@ -118,6 +118,11 @@ initSite = (site) ->
               siteKey,
               data: { id: light.lightId, state: { on: lightOn, bri } }
             })
+          tcpDevices.forEach (device) ->
+            lightId = device.properties?.lightId
+            if lightId == light.lightId
+              log "Shortcut send to tcp device"
+              sendToTcpDevice(device, bri)
       else
         log "ERROR: light", query, " not found"
 
@@ -143,25 +148,27 @@ initSite = (site) ->
       else
         log "ERROR: light", query, " not found"
 
-  tcpDevices.forEach ({deviceId, properties}) ->
-    lightId = properties?.lightId
+  tcpDevices.forEach (device) ->
+    lightId = device.properties?.lightId
     if lightId
-      sendState = (state) ->
-        transform = (bri) => 
-          max = properties.brightness?.max || 255
-          scaled = Math.round(scale(0, 255, 0, max)(bri))
-          if properties.brightness?.quadratic then quadraticBrightness(scaled, max) else scaled
-
-        mappedState = L.modify(L.prop("value"), transform, state)
-        log "send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + state.value + " to " + mappedState.value
-        tcpServer.sendToDevice(deviceId)(mappedState)
+      sendState = (state) -> sendToTcpDevice(device, state.value)
       lightStateP(lightId).forEach(sendState)
       lightStateP(lightId).debounce(2000).forEach(sendState)
       tcpServer.deviceConnectedE
-        .filter((id) -> id == deviceId)
+        .filter((id) -> id == device.deviceId)
         .map(lightStateP(lightId))
         .delay(1000)
         .forEach(sendState)
+
+  sendToTcpDevice = ({deviceId, properties}, bri) ->
+    transform = (bri) => 
+      max = properties.brightness?.max || 255
+      scaled = Math.round(scale(0, 255, 0, max)(bri))
+      if properties.brightness?.quadratic then quadraticBrightness(scaled, max) else scaled
+
+    mappedState = { type: "brightness", value: transform(bri) }
+    log "send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + bri + " to " + mappedState.value
+    tcpServer.sendToDevice(deviceId)(mappedState)
 
   controlLight = (query, controlP, manualOverridePeriod = time.hours(3)) ->
     valueDiffersFromControl = (v,c) -> v != booleanToBri(c)
