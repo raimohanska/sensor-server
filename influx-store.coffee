@@ -34,7 +34,7 @@ initSite = (site) ->
     errorE.debounceImmediate(time.oneHour).onValue (err) ->
       log "Influx storage error: " + err.stack.split("\n")
     inErrorP = errorE.awaiting(resultE.skipErrors()).hasMaintainedValueForPeriod(true, time.oneSecond)
-    inErrorP.skipDuplicates().changes().onValue (error) ->
+    inErrorP.skipDuplicates().debounce(time.oneHour).changes().onValue (error) ->
       if error
         site.mail.send("Influx storage error", "Couldn't save event to the Influx Database")
       else
