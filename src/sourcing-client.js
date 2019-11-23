@@ -1,6 +1,4 @@
-const R = require("ramda");
 const log = require("./log");
-const B=require("baconjs");
 const io = require('socket.io-client');
 
 const initSite = function(site) {
@@ -10,7 +8,7 @@ const initSite = function(site) {
     const socket = io(sourceSite.url);
     socket.on("connect", function() {
       log("Connected to source server", sourceSite.url);
-      socket.emit("login", { siteId: sourceSite.siteId, siteKey: sourceSite.siteKey });
+      socket.emit("login", { siteId: sourceSite.siteId, siteKey: sourceSite.siteKey });
   });
     socket.on("disconnect", () => log("Disconnected from source server", sourceSite.url));
     socket.on("login-error", error => log("Error logging into source server " + sourceSite.url + ":" + error));

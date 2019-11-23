@@ -13,8 +13,8 @@ const getSender = function(config) {
     } catch (e) {
       log("Module node-intertechno-sender not installed, using mock Intertechno interface");
       return {
-        enableTransmit(pin) {},
-        setRepeatTransmit(count) {},
+        enableTransmit() {},
+        setRepeatTransmit() {},
         setState(id, state) { return log("Pretending to send " + id + "=" + state + " on pin " + pin); }
       };
     } })();

@@ -29,7 +29,7 @@ if (port != null) {
     let id = null;
     const discoE = B.fromEvent(socket, 'close').take(1).map(() => (({ socket, id })));
     discoE.forEach(() => log('disconnected', socket.remoteAddress));
-    const errorE = B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress);
+    B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress);
     removeSocketE.plug(discoE);
     const lineE = B.fromEvent((carrier.carry(socket)), "line");
     const jsonE = lineE.flatMap(B.try(JSON.parse));

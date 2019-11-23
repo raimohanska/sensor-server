@@ -1,11 +1,9 @@
 "use strict";
-const util = require("util");
 const B = require('baconjs');
 const R = require('ramda');
 const L = require('partial.lenses');
 const scale = require('./scale');
 const time = require("./time");
-const moment = require('moment');
 const io = require('socket.io-client');
 const log = (...msg) => console.log(new Date().toString(), ...Array.from(msg));
 const rp = require('request-promise');
@@ -16,6 +14,8 @@ const quadraticBrightness = (bri, max) => Math.ceil((bri * bri) / (max || 255));
 const booleanToBri = function(b) { 
   if (typeof b === "number") {
     return b;
+  } else if (typeof b === "string") {
+    return b === "true";
   } else {
     if (b) { return 255; } else { return 0; }
   }
@@ -24,57 +24,34 @@ const booleanToBri = function(b) {
 
 const initSite = function(site) {
   const siteConfig = site.config;
-  const houmConfig = siteConfig.houm3;
+  const houmConfig = siteConfig.houm;
   if (!houmConfig) {
     return null;
   }
-  const houmSocket = io.connect('https://houmkolmonen.herokuapp.com', {
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 3000,
-    transports: ['websocket']
-  });
+  const houmSocket = io('http://houmi.herokuapp.com');
   const houmConnectE = B.fromEvent(houmSocket, "connect");
-  const houmDisconnectE = B.fromEvent(houmSocket, "disconnect");
   const tcpDevices = R.toPairs(siteConfig.devices)
     .map(function(...args) { const [deviceId, {properties}] = Array.from(args[0]); return { deviceId, properties}; })
     .filter(({properties}) => properties != null ? properties.tcp : undefined);
-  const {
-    siteKey
-  } = houmConfig;
-  const houmConfigUrl = "https://houmkolmonen.herokuapp.com/api/site/" + siteKey;
-  const houmLightsP = B.fromPromise(rp(houmConfigUrl))
+  const houmLightsP = B.fromPromise(rp("https://houmi.herokuapp.com/api/site/" + houmConfig.siteKey))
     .map(JSON.parse)
-    .map(function(config) { 
-          const roomNames = R.fromPairs(config.locations.rooms.map(room => [room.id, room.name]));
-          return config.devices.map(({name,roomId,id})=> ({light:name,room: roomNames[roomId],lightId:id}));
-        })
+    .map(".lights")
+    .map(lights => lights.map(({name,room,_id})=> ({light:name,room,lightId:_id})))
     .toProperty();
   houmLightsP
     .forEach(log, "HOUM lights found");
   houmConnectE.onValue(() => {
-    houmSocket.emit('subscribe', { siteKey });
+    houmSocket.emit('clientReady', { siteKey: houmConfig.siteKey});
     return log("Connected to HOUM");
   });
   const houmReadyE = B.combineAsArray(houmConnectE, houmLightsP).map(true);
   const houmReadyP = B.once(false).concat(houmReadyE).toProperty();
   houmReadyE.forEach(() => log("HOUM ready"));
-  B.fromEvent(houmSocket, 'siteKeyFound').log("Site found");
 
-  B.fromEvent(houmSocket, 'noSuchSiteKey').log("HOUM site not found by key");
-  const lightE = B.fromEvent(houmSocket, "site")
-    .map(".data.devices")
-    .map(devices => devices.map(d => ({
-    id: d.id,
-    bri: d.state.on ? ((d.state.bri !== undefined) ? d.state.bri : 255) : 0
-  })))
-    .diff([], R.flip(R.difference))
-    .changes()
-    .skip(1)
-    .flatMap(B.fromArray);
-
+  const lightE= B.fromEvent(houmSocket, 'setLightState');
   const lightStateE = lightE
-    .combine(houmLightsP, function({id, bri}, lights) {
-      const light = findById(id, lights);
+    .combine(houmLightsP, function({_id, bri}, lights) {
+      const light = findById(_id, lights);
       return { lightId: light.lightId, room: light.room, light: light.light, type:"brightness", value:bri };
   })
     .sampledBy(lightE);
@@ -124,18 +101,8 @@ const initSite = function(site) {
         }
         log("Set", light.light, "bri="+bri, "on="+lightOn);
         if (!mock) {
-          houmSocket.emit('apply/device', {
-            siteKey,
-            data: { id: light.lightId, state: { on: lightOn, bri } }
-          });
+          return houmSocket.emit('apply/light', {_id: light.lightId, on: lightOn, bri });
         }
-        return tcpDevices.forEach(function(device) {
-          const lightId = device.properties != null ? device.properties.lightId : undefined;
-          if (lightId === light.lightId) {
-            log("Shortcut send to tcp device");
-            return sendToTcpDevice(device, bri);
-          }
-        });
       });
     } else {
       return log("ERROR: light", query, " not found");
@@ -171,31 +138,29 @@ const initSite = function(site) {
     });
   });
 
-  tcpDevices.forEach(function(device) {
-    const lightId = device.properties != null ? device.properties.lightId : undefined;
+  tcpDevices.forEach(function({deviceId, properties}) {
+    const lightId = properties != null ? properties.lightId : undefined;
     if (lightId) {
-      const sendState = state => sendToTcpDevice(device, state.value);
+      const sendState = function(state) {
+        const transform = bri => { 
+          const max = (properties.brightness != null ? properties.brightness.max : undefined) || 255;
+          const scaled = Math.round(scale(0, 255, 0, max)(bri));
+          if ((properties.brightness != null ? properties.brightness.quadratic : undefined)) { return quadraticBrightness(scaled, max); } else { return scaled; }
+        };
+
+        const mappedState = L.modify(L.prop("value"), transform, state);
+        log("send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + state.value + " to " + mappedState.value);
+        return tcpServer.sendToDevice(deviceId)(mappedState);
+      };
       lightStateP(lightId).forEach(sendState);
       lightStateP(lightId).debounce(2000).forEach(sendState);
       return tcpServer.deviceConnectedE
-        .filter(id => id === device.deviceId)
+        .filter(id => id === deviceId)
         .map(lightStateP(lightId))
         .delay(1000)
         .forEach(sendState);
     }
   });
-
-  var sendToTcpDevice = function({deviceId, properties}, bri) {
-    const transform = bri => { 
-      const max = (properties.brightness != null ? properties.brightness.max : undefined) || 255;
-      const scaled = Math.round(scale(0, 255, 0, max)(bri));
-      if ((properties.brightness != null ? properties.brightness.quadratic : undefined)) { return quadraticBrightness(scaled, max); } else { return scaled; }
-    };
-
-    const mappedState = { type: "brightness", value: transform(bri) };
-    log("send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + bri + " to " + mappedState.value);
-    return tcpServer.sendToDevice(deviceId)(mappedState);
-  };
 
   const controlLight = function(query, controlP, manualOverridePeriod) {
     if (manualOverridePeriod == null) { manualOverridePeriod = time.hours(3); }
@@ -205,9 +170,9 @@ const initSite = function(site) {
       .changes();
     const ackP = controlP.flatMapLatest(c => B.once(false).concat(setValueE.skipWhile(v => valueDiffersFromControl(v, c)).take(1).map(true))).toProperty();
     ackP.log(query + " control ack");
-    const manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest(function(v) {
+    const manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest(function() {
       console.log("start monitoring " + query + " overrides");
-      return setValueE.takeUntil(controlP.changes()).log("override event for " + query);
+      return setValueE.takeUntil(controlP.changes());
     }).withLatestFrom(controlP, valueDiffersFromControl);
     const manualOverrideP = manualOverrideE
       .flatMapLatest(function(override) { 
@@ -225,7 +190,6 @@ const initSite = function(site) {
   };
 
 
-  const findByName = (name, lights) => R.find((light => light.name.toLowerCase() === name.toLowerCase()), lights);
   var findById = (id, lights) => R.find((light => light.lightId === id), lights);
   var findByQuery = (query, lights) => R.filter(matchLight(query), lights);
 

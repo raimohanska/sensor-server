@@ -1,4 +1,5 @@
 const houm = require("./houm3");
+const process = require("process")
 const siteKey = process.env.HOUMIO_SITEKEY;
 const args = process.argv;
 const cmd = args[2];
@@ -29,7 +30,7 @@ if ((cmd === "set") && (args.length === 5)) {
     return houm.setLight(light)(targetValue);
   });
 } else {
-  doHoum(houm => fail(`\
+  doHoum(() => fail(`\
 Usage: houm-cli set [light] [value]\
 `));
 }

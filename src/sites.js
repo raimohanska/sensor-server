@@ -1,7 +1,4 @@
-const B = require('baconjs');
-const R = require('ramda');
 const log = require("./log");
-const config = require("./read-config");
 
 const sites = {};
 

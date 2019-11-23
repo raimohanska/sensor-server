@@ -5,10 +5,10 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const log = require("./log");
 const bodyParser = require("body-parser");
-const devices = require("./devices");
 const sites = require("./sites");
 const Bacon = require("baconjs");
 const config = require("./read-config");
+const process = require("process")
 
 const port = process.env.PORT || (config.http != null ? config.http.port : undefined) || 5080;
 
@@ -25,7 +25,7 @@ const initSite = function(site) {
       // TODO: merge current values, store values
       res.send(JSON.stringify(R.merge(site.config.web, { values })));
     });
-    app.post("/site/" + site.config.siteKey + "/ui/values", jsonParser, function(req, res) {
+    app.post("/site/" + site.config.siteKey + "/ui/values", jsonParser, function(req) {
       console.log(req.body);
       R.toPairs(req.body).forEach((...args) => {
         const [key, value] = Array.from(args[0]);

@@ -1,12 +1,9 @@
 const R = require("ramda");
-const log = require("./log");
 const B=require("baconjs");
 const moment=require("moment");
 const time = require("./time");
 const scale = require("./scale");
 const suncalc = require("suncalc");
-
-const parseTime = str => moment(str + " +0000", "h:mm:ss A Z");
 
 const LIGHT = 255;
 const DARK = 0;
@@ -32,7 +29,7 @@ const getSunBrightness = function(time, lat, lon) {
   //currentTime = currentTime.subtract(11, 'h')
   const currentTime = moment(time);
   const sunInfo = getSunlightInfo(time, lat, lon);
-  if (currentTime.isBefore(sunInfo.twilightBegin) || currentTime.isAfter(sunInfo.twilightEnd)) {
+  if (currentTime.isBefore(sunInfo.twilightBegin) || currentTime.isAfter(sunInfo.twilightEnd)) {
     return DARK;
   } else if (currentTime.isBefore(sunInfo.sunrise)) {
     // fading in

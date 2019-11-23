@@ -3,8 +3,6 @@ require('./bacon-extensions');
 const R = require('ramda');
 const L = require('partial.lenses');
 const time = require('./time');
-const log = require("./log");
-const carrier = require("carrier");
 
 const initSite = function(site) { 
   const siteConfig = site.config;

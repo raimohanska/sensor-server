@@ -1,5 +1,4 @@
 const R = require("ramda");
-const log = require("./log");
 const B=require("baconjs");
 const validate = require("./validate");
 

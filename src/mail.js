@@ -14,7 +14,7 @@ const initSite = function(site) {
         subject,
         text
       };
-      return mailgun.messages().send(data, function(error, body) {
+      return mailgun.messages().send(data, function(error) {
         if (error) {
           return log("Error sending mail", error);
         } else {

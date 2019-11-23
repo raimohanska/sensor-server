@@ -1,7 +1,5 @@
 const B = require("baconjs");
-const time = require("./time");
 const scale = require("./scale");
-const log = require("./log");
 const store = require("./store")("latest-values");
 
 B.range = (start, end, interval) => B.repeat(function(i) {

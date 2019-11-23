@@ -2,7 +2,6 @@ const net = require('net');
 const B = require('baconjs');
 const R = require('ramda');
 const log = require("./log");
-const carrier = require("carrier");
 const config = require('./read-config').trackerServer;
 const {
   sites
@@ -41,13 +40,13 @@ if (port != null) {
     const id = null;
     const discoE = B.fromEvent(socket, 'close').take(1).map(() => (({ socket, id })));
     discoE.forEach(() => log('disconnected', socket.remoteAddress));
-    const errorE = B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress);
+    B.fromEvent(socket, 'error').log("Error reading from " + socket.remoteAddress);
     const chars = B.fromEvent(socket, 'data')
       .flatMap(buffer => B.fromArray(Array.prototype.slice.call(buffer, 0)))
       .map(String.fromCharCode);
     chars
       .filter(b => b === '(')
-      .flatMapFirst(b => chars
+      .flatMapFirst(() => chars
          .takeWhile(b => b !== ')')
          .fold('', (soFar, next) => soFar + next)).map(str => '(' + str + ')')
       .map(parseTrackerInfo)

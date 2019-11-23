@@ -15,8 +15,6 @@ const parseTime = function(str) {
   };
 };
 
-const div = (x, y) => (x < 0 ? x + y : x) % y;
-
 Array.prototype.indexWhere = function(f) {
   for (let i = 0; i < this.length; i++) {
     const v = this[i];
@@ -37,17 +35,17 @@ const Curve = function(points, discrete) {
       prevPoint = points[points.length - 1];
       prevPoint = { time: prevPoint.time.today(), value: prevPoint.value };
       nextPoint = points[0];
-      nextPoint = { time: nextPoint.time.tomorrow(), value: nextPoint.value };
+      nextPoint = { time: nextPoint.time.tomorrow(), value: nextPoint.value };
     } else if (nextPointIndex === 0) {
       prevPoint = points[points.length - 1];
       prevPoint = { time: prevPoint.time.yesterday(), value: prevPoint.value };
       nextPoint = points[0];
-      nextPoint = { time: nextPoint.time.today(), value: nextPoint.value };
+      nextPoint = { time: nextPoint.time.today(), value: nextPoint.value };
     } else {
       prevPoint = points[nextPointIndex - 1];
       prevPoint = { time: prevPoint.time.today(), value: prevPoint.value };
       nextPoint = points[nextPointIndex];
-      nextPoint = { time: nextPoint.time.today(), value: nextPoint.value };
+      nextPoint = { time: nextPoint.time.today(), value: nextPoint.value };
     }
 
     if (discrete) {
@@ -69,6 +67,7 @@ Curve.curveProperty = (p, discrete) => B.combineTemplate({
 }).map(({curve, time}) => Curve(curve, discrete)(time))
   .skipDuplicates();
 
+/*
 const exampleCurve = Curve([
     { time: "0:00", value: 0 },
     { time: "15:00", value: 0 },
@@ -77,6 +76,7 @@ const exampleCurve = Curve([
     { time: "19:15", value: 0 }
 ]);
 
-//console.log exampleCurve(time.todayAt("16:59:59"))
+console.log exampleCurve(time.todayAt("16:59:59"))
+*/
 
 module.exports = Curve;

@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "watch": "node_modules/nodemon/bin/nodemon.js -e js,html,css,less --ignore 'dist/*' --exec 'npm start'"
+    "start": "node src/server.js",
+    "watch": "node_modules/nodemon/bin/nodemon.js -e js,html,css,less --ignore 'dist/*' --exec 'npm start'",
+    "lint": "eslint src"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +28,12 @@
     "suncalc": "^1.7.0"
   },
   "devDependencies": {
+    "eslint": "^6.7.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "nodemon": "^1"
   }
 }

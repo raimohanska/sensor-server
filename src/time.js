@@ -1,5 +1,3 @@
-const R = require("ramda");
-const log = require("./log");
 const B=require("baconjs");
 const moment=require("moment");
 const now = () => moment();
