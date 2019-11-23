@@ -14,7 +14,6 @@ const HttpServer = require("./http-server");
 const influx = require("./influx-store");
 const config = require("./read-config");
 const sensors = require("./sensors");
-const houm = require("./houm");
 const houm3 = require("./houm3");
 const devices = require("./devices");
 const sites = require("./sites");
@@ -41,7 +40,7 @@ siteConfigs.forEach(function(...args) {
   site.mail = mail.initSite(site);
   site.sensors = sensors.initSite(site);
   site.devices = devices.initSite(site);
-  site.houm = houm3.initSite(site) || houm.initSite(site);
+  site.houm = houm3.initSite(site);
   site.motion = motion.initSite(site);
   site.influx = influx.initSite(site);
   site.intertechno = intertechno.initSite(site);
