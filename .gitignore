@@ -3,7 +3,7 @@ node_modules
 log
 log.txt
 npm-debug.log
-*config.js
+/*config.js
 latest-values.json
 site.*.json
 .vscode
