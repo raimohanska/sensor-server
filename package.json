@@ -2,10 +2,10 @@
   "name": "sensor-server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.coffee",
+  "main": "server.js",
   "scripts": {
-    "serve": "coffee server.coffee",
-    "watch": "node_modules/nodemon/bin/nodemon.js -e js,html,coffee,css,less --ignore 'dist/*' --exec 'npm run serve'"
+    "start": "node server.js",
+    "watch": "node_modules/nodemon/bin/nodemon.js -e js,html,css,less --ignore 'dist/*' --exec 'npm start'"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +19,6 @@
     "influx": "^5.0.7",
     "mailgun-js": "^0.7.14",
     "moment": "^2.11.0",
-    "node-intertechno-sender": "0.0.4",
     "partial.lenses": "^3",
     "ramda": "^0.19",
     "request-promise": "^1.0.2",

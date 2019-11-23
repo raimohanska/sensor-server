@@ -103,7 +103,7 @@ You can omit any of the `influx` and `propertyMapping` sections if you don't nee
 
 Then run:
 
-    npm run serve
+    npm start
 
 Run, restart on file changes
 
@@ -144,3 +144,7 @@ An array of events is accepted too, so that multiple events can be included in a
 #### TCP Protocol
 
 Sensor event collection with JSON over TCP. Documentation missing.
+
+#### Intertechno switches ####
+
+To enable support, run `npm install --save node-intertechno-sender`
