@@ -194,9 +194,10 @@ const initSite = function(site) {
     return tcpServer.sendToDevice(deviceId)(mappedState);
   };
 
-  const controlLight = function(query, controlP, manualOverridePeriod) {
+  const controlLight = function(query, controlP, manualOverridePeriod, manualOverridePeriodOffState) {
     if (manualOverridePeriod == null) { manualOverridePeriod = time.hours(3); }
-    const valueDiffersFromControl = (v, c) => v !== booleanToBri(c);
+    if (manualOverridePeriodOffState == null) { manualOverridePeriodOffState = manualOverridePeriod; }
+    const valueDiffersFromControl = (v, c) => v !== booleanToBri(c) ? v : undefined;
     const setValueE = lightStateP(query)
       .map(".value")
       .changes();
@@ -208,8 +209,8 @@ const initSite = function(site) {
     }).withLatestFrom(controlP, valueDiffersFromControl);
     const manualOverrideP = manualOverrideE
       .flatMapLatest(function(override) { 
-        if (override) {
-          return B.once(true).concat(B.later(manualOverridePeriod, false));
+        if (override != undefined) {
+          return B.once(true).concat(B.later(override > 0 ? manualOverridePeriod : manualOverridePeriodOffState, false));
         } else {
           return B.once(false);
         }})
