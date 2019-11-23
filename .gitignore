@@ -7,3 +7,4 @@ npm-debug.log
 smoothtest.coffee
 latest-values.json
 site.*.json
+.vscode
