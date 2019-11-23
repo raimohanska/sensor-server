@@ -18,7 +18,7 @@ hostDownE = (hostname, options = {}) ->
   tenConsecutiveFails = ->
     pingSuccessE.take(1).filter(false) # wait for first success
     .concat(pingFailE.take(1).filter(false)) # wait for first failure
-    .concat(pingFailE.take(downCount - 1).doAction(log, "ping fail: " + hostname).last().takeUntil(pingSuccessE.doLog("ping ok: " + hostname)))
+    .concat(pingFailE.take(downCount - 1).doAction(log, "ping fail: " + hostname).last().takeUntil(pingSuccessE.doAction(log, "ping ok: " + hostname)))
   B.repeat(tenConsecutiveFails)
  
 module.exports = { hostDownE, pingE }
