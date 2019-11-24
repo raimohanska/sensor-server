@@ -210,13 +210,17 @@ const initSite = function(site) {
     const manualOverrideP = manualOverrideE
       .flatMapLatest(function(override) { 
         if (override != undefined) {
-          return B.once(true).concat(B.later(override > 0 ? manualOverridePeriod : manualOverridePeriodOffState, false));
+          const period = override > 0 ? manualOverridePeriod : manualOverridePeriodOffState
+          log("Manual override started for " + query + " and active for " + time.formatDuration(period))
+          return B.once(true).concat(B.later(period, false));
         } else {
           return B.once(false);
         }})
       .toProperty(false)
       .skipDuplicates()
-      .log("manual override active for " + query);
+      
+    manualOverrideP.filter(o => !o)
+      .log("manual override ended for " + query);
 
     controlP.filter(manualOverrideP.not()).forEach(setLight(query));
     return manualOverrideP.changes().filter(x => !x).map(controlP).skipDuplicates().forEach(setLight(query));
