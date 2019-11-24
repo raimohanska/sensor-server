@@ -218,9 +218,9 @@ const initSite = function(site) {
         }})
       .toProperty(false)
       .skipDuplicates()
-      
+
     manualOverrideP.filter(o => !o)
-      .log("manual override ended for " + query);
+      .onValue(()=> log("manual override ended for " + query));
 
     controlP.filter(manualOverrideP.not()).forEach(setLight(query));
     return manualOverrideP.changes().filter(x => !x).map(controlP).skipDuplicates().forEach(setLight(query));
