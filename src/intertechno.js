@@ -1,5 +1,7 @@
 const R = require("ramda");
 const log = require("./log");
+const time = require("./time");
+const B = require("baconjs");
 
 let sender = null;
 const getSender = function(config) {
@@ -24,6 +26,11 @@ const getSender = function(config) {
   return sender;
 };
 
+const commandBus = new B.Bus()
+commandBus.bufferingThrottle(time.oneSecond).forEach(({itId, state}) => {
+  sender.setState(itId, state);
+})
+
 const initSite = function(site) {
   const itConfig = site.config.intertechno;
   if (!itConfig) {
@@ -40,13 +47,17 @@ const initSite = function(site) {
         const itId = d.properties.intertechnoId;
         log("Mapping light " + lightId + " to Intertechno id " + itId);
         const brightnessP = site.houm.lightStateP(lightId).map('.value');
-        return brightnessP.forEach(function(bri) {
+        return brightnessP.repeatLatest(time.oneMinute * 15).forEach(function(bri) {
           const state = bri > 0;
           log("Intertechno " + itId + " state=" + state);
-          return sender.setState(itId, state);
+          commandBus.push({itId, state});          
         });
     });
   }
 };
+
+commandBus.onValue(({itId, state}) => {
+  sender.setState(itId, state);
+})
 
 module.exports = { initSite, getSender };
