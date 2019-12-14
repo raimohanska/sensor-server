@@ -10,7 +10,8 @@ const jsonParser = (req, res, next) => {
         req.body = JSON.parse(req.body)
         next()
       } catch (e) {
-        console.error("Error parsing JSON: " + e + " body = " + req.body)
+        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        console.error("Error parsing JSON from " + ip + ": " + e + " body = " + req.body)
         res.status(400)
         res.send("Invalid JSON")
       }
