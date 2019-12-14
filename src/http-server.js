@@ -4,7 +4,7 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const log = require("./log");
-const bodyParser = require("body-parser");
+const jsonParser = require("./json-body-parser");
 const sites = require("./sites");
 const Bacon = require("baconjs");
 const config = require("./read-config");
@@ -12,7 +12,6 @@ const process = require("process")
 
 const port = process.env.PORT || (config.http != null ? config.http.port : undefined) || 5080;
 
-const jsonParser = bodyParser.json();
 
 const sensorE = Bacon.Bus();
 
