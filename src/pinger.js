@@ -1,12 +1,18 @@
 const B=require("baconjs");
 let log=require("./log");
 const ping = require("ping");
-const {
-  exec
-} = require('child_process');
 
 function silence(duration) {
   return B.later(duration).filter(false)
+}
+
+function storePing(hostname, interval, influx) {
+  pingE(hostname, { interval })
+  .forEach(p => {
+    const value = p.alive ? p.time : -1
+    log("Ping", hostname, value)
+    influx.store({type: "ping", host: hostname, value })
+  });
 }
 
 const pingE = function(hostname, options) {
@@ -32,4 +38,4 @@ const hostDownE = function(hostname, options) {
 
 //hostDownE("192.168.1.1", { downCount: 2 } ).log()
  
-module.exports = { hostDownE, pingE };
+module.exports = { hostDownE, pingE, storePing };
