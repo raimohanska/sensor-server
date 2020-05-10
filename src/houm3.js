@@ -50,7 +50,7 @@ const initSite = function(site) {
     .forEach(log, "HOUM lights found");
   houmConnectE.onValue(() => {
     houmSocket.emit('subscribe', { siteKey });
-    return log("Connected to HOUM");
+    log("Connected to HOUM");
   });
   const houmReadyE = B.combineAsArray(houmConnectE, houmLightsP).map(true);
   const houmReadyP = B.once(false).concat(houmReadyE).toProperty();
@@ -58,7 +58,15 @@ const initSite = function(site) {
   B.fromEvent(houmSocket, 'siteKeyFound').log("Site found");
 
   B.fromEvent(houmSocket, 'noSuchSiteKey').log("HOUM site not found by key");
-  const lightE = B.fromEvent(houmSocket, "site")
+  const houmUpdateE = B.fromEvent(houmSocket, "site")
+  const houmConnectionStaleE = houmUpdateE.map(true).debounce(time.minutes(1))
+    .log("Houm connection stale. Reconnecting...")
+    .forEach(() => { 
+      houmSocket.disconnect() 
+      houmSocket.connect()
+    })
+
+  const lightE = houmUpdateE
     .map(".data.devices")
     .map(devices => devices.map(d => ({
     id: d.id,
