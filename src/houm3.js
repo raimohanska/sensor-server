@@ -120,7 +120,7 @@ const initSite = function(site) {
   const setLight = query => bri => houmLightsP.take(1).forEach(function(lights) {
     lights = findByQuery(query, lights);
     if (lights.length > 0) {
-      return lights.forEach(function(light) {
+      lights.forEach(function(light) {
         let lightOn = bri;
         if (typeof bri === "number") {
           lightOn = bri>0;
@@ -134,16 +134,16 @@ const initSite = function(site) {
             data: { id: light.lightId, state: { on: lightOn, bri } }
           });
         }
-        return tcpDevices.forEach(function(device) {
+        tcpDevices.forEach(function(device) {
           const lightId = device.properties != null ? device.properties.lightId : undefined;
           if (lightId === light.lightId) {
             log("Shortcut send to tcp device");
-            return sendToTcpDevice(device, bri);
+            sendToTcpDevice(device, bri);
           }
         });
       });
     } else {
-      return log("ERROR: light", query, " not found");
+      log("ERROR: light", query, " not found");
     }
   });
 
