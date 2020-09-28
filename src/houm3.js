@@ -210,9 +210,9 @@ const initSite = function(site) {
       .map(".value")
       .changes();
     const ackP = controlP.flatMapLatest(c => B.once(false).concat(setValueE.skipWhile(v => valueDiffersFromControl(v, c)).take(1).map(true))).toProperty();
-    ackP.log(query + " control ack");
+    //ackP.log(query + " control ack");
     const manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest(function() {
-      console.log("start monitoring " + query + " overrides");
+      //console.log("start monitoring " + query + " overrides");
       return setValueE.takeUntil(controlP.changes()).log("override event for " + query);
     }).withLatestFrom(controlP, valueDiffersFromControl);
     const manualOverrideP = manualOverrideE

@@ -41,15 +41,13 @@ const initSite = function(site) {
     return R.values(site.config.devices)
       .filter(d => ((d.properties != null ? d.properties.intertechnoId : undefined) >= 0) && d.properties.lightId)
       .forEach(function(d) {
-        const {
-          lightId
-        } = d.properties;
+        const lightId = d.properties.lightId;
         const itId = d.properties.intertechnoId;
-        log("Mapping light " + lightId + " to Intertechno id " + itId);
+        log("Mapping light " + lightId + " to Intertechno id " + itId + " with name " + d.name);
         const brightnessP = site.houm.lightStateP(lightId).map('.value');
         return brightnessP.repeatLatest(time.oneMinute * 15).forEach(function(bri) {
           const state = bri > 0;
-          log("Intertechno " + itId + " state=" + state);
+          log("Intertechno " + d.name + " state=" + state);
           commandBus.push({itId, state});          
         });
     });
