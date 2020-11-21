@@ -181,7 +181,6 @@ const initSite = function(site) {
     if (lightId) {
       const sendState = state => sendToTcpDevice(device, state.value);
       lightStateP(lightId).forEach(sendState);
-      lightStateP(lightId).debounce(2000).forEach(sendState);
       return tcpServer.deviceConnectedE
         .filter(id => id === device.deviceId)
         .map(lightStateP(lightId))
