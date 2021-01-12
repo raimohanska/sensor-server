@@ -230,7 +230,7 @@ const initSite = function(site) {
       .onValue(()=> log("manual override ended for " + query));
 
     controlP.filter(manualOverrideP.not()).forEach(setLight(query));
-    return manualOverrideP.changes().filter(x => !x).map(controlP).skipDuplicates().forEach(setLight(query));
+    manualOverrideP.changes().filter(x => !x).map(controlP).forEach(setLight(query));
   };
 
 
