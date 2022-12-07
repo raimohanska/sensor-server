@@ -16,7 +16,7 @@
     "carrier": "^0.3.0",
     "coffee-script": "^1.9",
     "es6-promise": "^3.0.2",
-    "express": "^4.10.2",
+    "express": "^4.17.3",
     "influx": "^5.0.7",
     "mailgun-js": "^0.7.14",
     "moment": "^2.11.0",
