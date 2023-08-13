@@ -59,7 +59,7 @@ const initSite = function(site) {
 
   B.fromEvent(houmSocket, 'noSuchSiteKey').log("HOUM site not found by key");
   const houmUpdateE = B.fromEvent(houmSocket, "site")
-  const houmConnectionStaleE = houmUpdateE.map(true).debounce(time.minutes(1))
+  const houmConnectionStaleE = houmUpdateE.map(true).debounce(time.minutes(5))
     .log("Houm connection stale. Reconnecting...")
     .forEach(() => { 
       houmSocket.disconnect() 
@@ -204,16 +204,19 @@ const initSite = function(site) {
   const controlLight = function(query, controlP, manualOverridePeriod, manualOverridePeriodOffState) {
     if (manualOverridePeriod == null) { manualOverridePeriod = time.hours(3); }
     if (manualOverridePeriodOffState == null) { manualOverridePeriodOffState = manualOverridePeriod; }
+    controlP.log("control value for " + query)
     const valueDiffersFromControl = (v, c) => v !== booleanToBri(c) ? v : undefined;
-    const setValueE = lightStateP(query)
-      .map(".value")
-      .changes();
-    const ackP = controlP.flatMapLatest(c => B.once(false).concat(setValueE.skipWhile(v => valueDiffersFromControl(v, c)).take(1).map(true))).toProperty();
-    //ackP.log(query + " control ack");
-    const manualOverrideE = ackP.changes().filter(B._.id).flatMapLatest(function() {
-      //console.log("start monitoring " + query + " overrides");
-      return setValueE.takeUntil(controlP.changes()).log("override event for " + query);
-    }).withLatestFrom(controlP, valueDiffersFromControl);
+    const setValueE = lightStateP(query).map(".value").changes();
+    setValueE.onValue(v => log("setValue " + query + " " + v))
+    const ackP = controlP.changes().flatMapLatest(c => 
+      B.once(false).concat(setValueE.skipWhile(v => valueDiffersFromControl(v, c)).take(1).map(true))
+    ).toProperty();
+    ackP.log(query + " control ack");
+    const manualOverrideE = B.once().merge(ackP.changes().filter(B._.id)).flatMapLatest(function() {
+      log("start monitoring " + query + " overrides");
+      return setValueE.takeUntil(controlP.changes())
+    }).withLatestFrom(controlP, valueDiffersFromControl)
+      .log("override event for " + query);
     const manualOverrideP = manualOverrideE
       .flatMapLatest(function(override) { 
         if (override != undefined) {
