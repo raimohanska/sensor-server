@@ -71,7 +71,7 @@ function init(mqttConfig) {
 
     const mapped = sensorType.mapValue(value)
     log("MQTT publish value", stateTopic, value, "mapped to", mapped)
-    client.publish(stateTopic, mapped)
+    client.publish(stateTopic, mapped, { retain: true })
   }
 
   function publishLightDiscovery(device, properties) {
@@ -94,7 +94,6 @@ function init(mqttConfig) {
         identifiers: [device],
         name: device
       },
-      retain: true,
     }
     client.publish('homeassistant/light/' + device + '/config', JSON.stringify(payload), { retain: true })
     log("MQTT publish light discovery", 'homeassistant/light/' + device + '/config', JSON.stringify(payload))
@@ -137,7 +136,7 @@ function init(mqttConfig) {
       // Subscribe for initial state only
       client.subscribe(stateTopic)
       if (!isIntertechno) {
-        client.publish(availabilityTopic, "online")
+        client.publish(availabilityTopic, "online", { retain: true })
       }
     }
 
@@ -145,7 +144,7 @@ function init(mqttConfig) {
       client.unsubscribe(commandTopic)
       client.unsubscribe(stateTopic)
       if (!isIntertechno) {
-        client.publish(availabilityTopic, "offline")
+        client.publish(availabilityTopic, "offline", { retain: true })
       }
     }
 
