@@ -25,14 +25,14 @@ function init(mqttConfig) {
 
   return { sendToMqtt, publishMqttLight }
 
-  function publishDiscovery(device, nodeId, stateTopic, type) {
+  function publishDiscovery(device, name, nodeId, stateTopic, type) {
     const payload = {
       name: nodeId,
       state_topic: stateTopic,
       unique_id: nodeId,
       device: {
         identifiers: [device],
-        name: device
+        name
       },      
     }
     const unit = UNIT_BY_TYPE[type]
@@ -42,12 +42,13 @@ function init(mqttConfig) {
     log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload))
   }
 
-  function publishLightDiscovery(device) {
+  function publishLightDiscovery(device, properties) {
     const commandTopic = 'lights/' + device + '/set'
     const stateTopic = 'lights/' + device + '/brightness'
+    const name = properties.name || device
     const payload = {
       schema: 'json',
-      name: device,
+      name,
       state_topic: stateTopic,
       brightness: true,
       brightness_scale: 255,
@@ -64,15 +65,15 @@ function init(mqttConfig) {
     return { commandTopic, stateTopic }
   }
 
-  function sendToMqtt(event) {
-    const { device, value, type } = event
+  function sendToMqtt(event) {    
+    const { device, name, value, type } = event
     if (value === undefined || !SUPPORTED_TYPES.includes(type) || !device) return
 
     const nodeId = device + '_' + type
     const stateTopic = 'sensors/' + device + '/' + type
 
     if (!discovered.has(nodeId)) {
-      publishDiscovery(device, nodeId, stateTopic, type)
+      publishDiscovery(device, name, nodeId, stateTopic, type)
       discovered.add(nodeId)
     }
 
@@ -108,7 +109,7 @@ function init(mqttConfig) {
   }
 
   function publishMqttLight(deviceId, properties) {
-    const { commandTopic, stateTopic } = publishLightDiscovery(deviceId)
+    const { commandTopic, stateTopic } = publishLightDiscovery(deviceId, properties)
     const onConnect = () => {
       client.subscribe(commandTopic)
       // Subscribe for initial state only

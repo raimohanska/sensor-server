@@ -25,7 +25,7 @@ module.exports = {
           properties: { location: "livingroom" }
         },
         "testdevice": {
-          properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31" }
+          properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31", name: "Test Device" }
         },
         "smartplug": {
           properties: { location: "autotalli", lightId: "3209uoewijroifjwoeijeori", intertechnoId: 2 }
