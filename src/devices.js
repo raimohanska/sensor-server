@@ -48,6 +48,9 @@ const initSite = function(site) {
   var filterValues = f => obj => R.fromPairs(R.toPairs(obj).filter(function(...args) { const [key, value] = Array.from(args[0]); return f(value, key); }));
 
   var calcAge = function(t) { if (t != null) { 
+    if (typeof t === "string") {
+      t = new Date(t).toISOString()
+    }
     return time.now().diff(t);
   } };
 
