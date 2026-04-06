@@ -7,7 +7,7 @@ const log = function(...msg) {
 
 module.exports = log;
 
-B.Observable .prototype. log = function(...msg) {
+B.Observable.prototype.log = function(...msg) {
   this.forEach(value => log(...Array.from(msg), value));
   return this;
 };
