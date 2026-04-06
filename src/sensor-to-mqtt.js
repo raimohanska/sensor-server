@@ -25,11 +25,15 @@ function init(mqttConfig) {
 
   return { sendToMqtt, publishMqttLight }
 
-  function publishDiscovery(nodeId, stateTopic, type) {
+  function publishDiscovery(device, nodeId, stateTopic, type) {
     const payload = {
       name: nodeId,
       state_topic: stateTopic,
-      unique_id: nodeId
+      unique_id: nodeId,
+      device: {
+        identifiers: [device],
+        name: device
+      },      
     }
     const unit = UNIT_BY_TYPE[type]
     if (unit) payload.unit_of_measurement = unit
@@ -49,6 +53,10 @@ function init(mqttConfig) {
       brightness_scale: 255,
       command_topic: commandTopic,
       unique_id: device + '_light',
+      device: {
+        identifiers: [device],
+        name: device
+      },
       retain: true,
     }
     client.publish('homeassistant/light/' + device + '/config', JSON.stringify(payload), { retain: true })
@@ -64,7 +72,7 @@ function init(mqttConfig) {
     const stateTopic = 'sensors/' + device + '/' + type
 
     if (!discovered.has(nodeId)) {
-      publishDiscovery(nodeId, stateTopic, type)
+      publishDiscovery(device, nodeId, stateTopic, type)
       discovered.add(nodeId)
     }
 
