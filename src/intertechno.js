@@ -31,6 +31,8 @@ commandBus.bufferingThrottle(time.oneSecond).forEach(({itId, state}) => {
   sender.setState(itId, state);
 })
 
+// TODO: intertechno mqtt
+
 const initSite = function(site) {
   const itConfig = site.config.intertechno;
   if (!itConfig) {
@@ -58,4 +60,4 @@ commandBus.onValue(({itId, state}) => {
   sender.setState(itId, state);
 })
 
-module.exports = { initSite, getSender };
+module.exports = { initSite };

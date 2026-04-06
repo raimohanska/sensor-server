@@ -17,6 +17,9 @@ module.exports = {
         username: "",
         password: ""
       },
+      intertechno: {
+        transmitPin: 18
+      },
       devices: {
         "sensor1": {
           properties: { location: "livingroom" }
