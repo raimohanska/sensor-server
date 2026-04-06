@@ -1,6 +1,8 @@
 const mqtt = require('mqtt')
 const log = require("./log")
 const tcp = require("./tcp-server")
+const time = require("./time")
+const intertechno = require("./intertechno")
 
 const UNIT_BY_TYPE = {
   temperature: '°C',
@@ -70,21 +72,50 @@ function init(mqttConfig) {
     client.publish(stateTopic, String(value))
   }
 
+  function TCPLight(deviceId, properties, onConnect, onDisconnect) {
+    tcp.deviceConnectedE.filter(id => id === deviceId).onValue(onConnect)
+    tcp.deviceDisconnectedE.filter(id => id === deviceId).onValue(onDisconnect)
+    return {
+      setBrightness(brightness) {
+        log("MQTT received light state for TCP device " + deviceId + " brightness=" + brightness)
+        tcp.sendBrightnessToDevice(deviceId, properties, brightness)
+      },
+    }
+  }
+
+  function IntertechnoLight(deviceId, properties, onConnect, onDisconnect) {
+    log("MQTT init Intertechno light", deviceId)
+    onConnect()
+    setInterval(() => {
+      // Request re-transmit each minute
+      onDisconnect()
+      setTimeout(onConnect, 1000)
+    }, time.oneMinute * 1)
+    return {
+      setBrightness(brightness) {
+        log("MQTT received light state for Intertechno device " + deviceId + " brightness=" + brightness)
+        intertechno.sendIntertechnoState(properties.intertechnoId, brightness > 0)
+      },
+    }
+  }
+
   function publishMqttLight(deviceId, properties) {
     const { commandTopic, stateTopic } = publishLightDiscovery(deviceId)
-    // Expected message on commandTopic (JSON schema):
-    //   {"state": "ON", "brightness": 128}
-    //   {"state": "OFF"}
-    tcp.deviceConnectedE.filter(id => id === deviceId).onValue(() => {
+    const onConnect = () => {
       client.subscribe(commandTopic)
       // Subscribe for initial state only
       client.subscribe(stateTopic)
-    })
+    }
 
-    tcp.deviceDisconnectedE.filter(id => id === deviceId).onValue(() => {
+    const onDisconnect = () => {
       client.unsubscribe(commandTopic)
       client.unsubscribe(stateTopic)
-    })
+    }
+
+    const light = properties.intertechnoId 
+      ? IntertechnoLight(deviceId, properties, onConnect, onDisconnect) 
+      : TCPLight(deviceId, properties, onConnect, onDisconnect)
+
     
     client.on('message', function(topic, message) {
         const str = message.toString()
@@ -100,8 +131,7 @@ function init(mqttConfig) {
       function parseAndApplyState() {
         const msg = JSON.parse(str)
         const brightness = msg.state === "OFF" ? 0 : msg.brightness !== undefined ? msg.brightness : 255
-        log("MQTT received light state for TCP device " + deviceId + " brightness=" + brightness)
-        tcp.sendBrightnessToDevice(deviceId, properties, brightness)
+        light.setBrightness(brightness)
       }
     })    
   }

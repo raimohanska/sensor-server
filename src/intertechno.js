@@ -31,7 +31,9 @@ commandBus.bufferingThrottle(time.oneSecond).forEach(({itId, state}) => {
   sender.setState(itId, state);
 })
 
-// TODO: intertechno mqtt
+function sendIntertechnoState(itId, state) {
+  commandBus.push({itId, state});          
+}
 
 const initSite = function(site) {
   const itConfig = site.config.intertechno;
@@ -50,7 +52,7 @@ const initSite = function(site) {
         return brightnessP.repeatLatest(time.oneMinute * 15).forEach(function(bri) {
           const state = bri > 0;
           log("Intertechno " + d.name + " state=" + state);
-          commandBus.push({itId, state});          
+          sendIntertechnoState(itId, state)          
         });
     });
   }
@@ -60,4 +62,4 @@ commandBus.onValue(({itId, state}) => {
   sender.setState(itId, state);
 })
 
-module.exports = { initSite };
+module.exports = { initSite, sendIntertechnoState };

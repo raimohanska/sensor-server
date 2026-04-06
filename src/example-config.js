@@ -26,6 +26,9 @@ module.exports = {
         },
         "testdevice": {
           properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31" }
+        },
+        "smartplug": {
+          properties: { location: "autotalli", lightId: "3209uoewijroifjwoeijeori", intertechnoId: 2 }
         }
       },
       latitude: 60.2695100,
