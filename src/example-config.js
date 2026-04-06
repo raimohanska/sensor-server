@@ -16,7 +16,7 @@ module.exports = {
         "sensor1": {
           properties: { location: "livingroom" }
         },
-        "raimo-unit-1": {
+        "testdevice": {
           properties: { location: "olohuone", lightId: "56d1815c36bae20300614d31" }
         }
       },
