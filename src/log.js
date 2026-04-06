@@ -1,7 +1,7 @@
 const B=require("baconjs");
 
 const log = function(...msg) {
-  console.log(new Date().toString(), ...Array.from(msg));
+  console.log(new Date().toISOString(), ...Array.from(msg));
   return msg[msg.length - 1];
 };
 
