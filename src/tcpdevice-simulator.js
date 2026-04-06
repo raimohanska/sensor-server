@@ -10,7 +10,8 @@ const client = new net.Socket();
 client.connect(port, host, function() {
   console.log("connected");
   const carrier = (require("carrier")).carry(client);
-  client.write(JSON.stringify({ device: "testdevice", temperature: 25.0, motion: 0 }) + "\n");
+  client.write(JSON.stringify({ device: "testdevice" }) + "\n");
+  client.write(JSON.stringify({ device: "testdevice", type: "temperature", value: 25.0 }) + "\n");
   client.write(JSON.stringify({ device: "testdevice", type: "motion", value: 0 }) + "\n");
   carrier.on("line", line => log(line));
 });

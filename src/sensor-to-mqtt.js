@@ -4,14 +4,27 @@ const tcp = require("./tcp-server")
 const time = require("./time")
 const intertechno = require("./intertechno")
 
-const UNIT_BY_TYPE = {
-  temperature: '°C',
-  humidity: '%'
+const SENSOR_TYPES = {
+  temperature: {
+    discovery: {
+      device_class: "temperature",
+      unit_of_measurement: '°C'
+    },
+    mapValue(value) {
+      return String(value)
+    }
+  },
+  motion: {
+    discovery: {
+      device_class: 'motion',
+      payload_on: 'ON',
+      payload_off: 'OFF',      
+    },
+    mapValue(value) {
+      return value ? "ON" : "OFF"
+    }
+  }
 }
-
-const SUPPORTED_TYPES = ["temperature", "motion"]
-
-
 
 function init(mqttConfig) {
   const discovered = new Set()
@@ -23,7 +36,7 @@ function init(mqttConfig) {
     console.error('MQTT error', err)
   })
 
-  return { sendToMqtt, publishMqttLight }
+  return { sendSensorEventToMqtt, publishMqttLight }
 
   function publishDiscovery(device, name, nodeId, stateTopic, type) {
     const payload = {
@@ -33,13 +46,32 @@ function init(mqttConfig) {
       device: {
         identifiers: [device],
         name
-      },      
+      },
+      ...SENSOR_TYPES[type].discovery
     }
-    const unit = UNIT_BY_TYPE[type]
-    if (unit) payload.unit_of_measurement = unit
 
     client.publish('homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
     log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload))
+  }
+
+  function sendSensorEventToMqtt(event) {    
+    
+    const { device, name, value, type } = event
+    const sensorType = SENSOR_TYPES[type]
+
+    if (value === undefined || !sensorType || !device) return
+
+    const nodeId = device + '_' + type
+    const stateTopic = 'sensors/' + device + '/' + type
+
+    if (!discovered.has(nodeId)) {
+      publishDiscovery(device, name, nodeId, stateTopic, type)
+      discovered.add(nodeId)
+    }
+
+    const mapped = sensorType.mapValue(value)
+    log("MQTT publish value", stateTopic, value, "mapped to", mapped)
+    client.publish(stateTopic, mapped)
   }
 
   function publishLightDiscovery(device, properties) {
@@ -65,21 +97,6 @@ function init(mqttConfig) {
     return { commandTopic, stateTopic }
   }
 
-  function sendToMqtt(event) {    
-    const { device, name, value, type } = event
-    if (value === undefined || !SUPPORTED_TYPES.includes(type) || !device) return
-
-    const nodeId = device + '_' + type
-    const stateTopic = 'sensors/' + device + '/' + type
-
-    if (!discovered.has(nodeId)) {
-      publishDiscovery(device, name, nodeId, stateTopic, type)
-      discovered.add(nodeId)
-    }
-
-    log("MQTT publish value", stateTopic, value)
-    client.publish(stateTopic, String(value))
-  }
 
   function TCPLight(deviceId, properties, onConnect, onDisconnect) {
     tcp.deviceConnectedE.filter(id => id === deviceId).onValue(onConnect)
