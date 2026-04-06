@@ -1,7 +1,6 @@
 "use strict";
 const B = require('baconjs');
 const R = require('ramda');
-const scale = require('./scale');
 const time = require("./time");
 const io = require('socket.io-client');
 const log = (...msg) => console.log(new Date().toString(), ...Array.from(msg));
@@ -59,7 +58,7 @@ const initSite = function(site) {
 
   B.fromEvent(houmSocket, 'noSuchSiteKey').log("HOUM site not found by key");
   const houmUpdateE = B.fromEvent(houmSocket, "site")
-  const houmConnectionStaleE = houmUpdateE.map(true).debounce(time.minutes(5))
+  houmUpdateE.map(true).debounce(time.minutes(5))
     .log("Houm connection stale. Reconnecting...")
     .forEach(() => { 
       houmSocket.disconnect() 
@@ -190,15 +189,7 @@ const initSite = function(site) {
   });
 
   var sendToTcpDevice = function({deviceId, properties}, bri) {
-    const transform = bri => { 
-      const max = (properties.brightness != null ? properties.brightness.max : undefined) || 255;
-      const scaled = Math.round(scale(0, 255, 0, max)(bri));
-      if ((properties.brightness != null ? properties.brightness.quadratic : undefined)) { return quadraticBrightness(scaled, max); } else { return scaled; }
-    };
-
-    const mappedState = { type: "brightness", value: transform(bri) };
-    log("send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + bri + " to " + mappedState.value);
-    return tcpServer.sendToDevice(deviceId)(mappedState);
+    tcpServer.sendBrightnessToDevice(deviceId, properties, bri);
   };
 
   const controlLight = function(query, controlP, manualOverridePeriod, manualOverridePeriodOffState) {

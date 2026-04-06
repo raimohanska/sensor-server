@@ -7,6 +7,7 @@ const config = require('./read-config').tcp;
 const sites = require("./sites");
 const port = config != null ? config.port : undefined;
 const mock = require("./mock");
+const scale = require('./scale');
 
 const addSocketE = B.Bus();
 const removeSocketE = B.Bus();
@@ -77,4 +78,17 @@ var sendToDevice = id => (function(msg) {
   });
 });
 
-module.exports = { devicesP, deviceConnectedE, sendToDevice, messageFromDeviceE };
+const quadraticBrightness = (bri, max) => Math.ceil((bri * bri) / (max || 255));
+const sendBrightnessToDevice = function(deviceId, properties, bri) {
+  const transform = bri => { 
+    const max = (properties.brightness != null ? properties.brightness.max : undefined) || 255;
+    const scaled = Math.round(scale(0, 255, 0, max)(bri));
+    if ((properties.brightness != null ? properties.brightness.quadratic : undefined)) { return quadraticBrightness(scaled, max); } else { return scaled; }
+  };
+
+  const mappedState = { type: "brightness", value: transform(bri) };
+  log("Send light state to tcp device " + deviceId + ": " + JSON.stringify(mappedState) + ", mapped from " + bri + " to " + mappedState.value);
+  return sendToDevice(deviceId)(mappedState);
+};
+
+module.exports = { devicesP, deviceConnectedE, sendToDevice, sendBrightnessToDevice, messageFromDeviceE };
