@@ -33,11 +33,13 @@ function publishDiscovery(nodeId, stateTopic, type) {
   log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
 }
 
+const SUPPORTED_TYPES = ["temperature", "motion"]
+
 function sendToMqtt(event) {
   if (!client) return
 
   const { device, value, type } = event
-  if (value === undefined || type === undefined || !device) return
+  if (value === undefined || !SUPPORTED_TYPES.includes(type) || !device) return
 
   const nodeId = device + '_' + type
   const stateTopic = 'sensors/' + device + '/' + type
