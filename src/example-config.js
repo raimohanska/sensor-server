@@ -4,14 +4,14 @@ module.exports = {
   },
   sites: {
     default: {
+      /*
       influx: {
-        database: "mydb",
-        username: "",
-        password: "",
-        protocol: "http",
-        host: "localhost",
-        port: 8086
+        url: "https://localhost:8086",
+        token: "",
+        org: "",
+        bucket: "default",
       },
+      */
       devices: {
         "sensor1": {
           properties: { location: "livingroom" }
@@ -22,9 +22,6 @@ module.exports = {
       },
       latitude: 60.2695100,
       longitude: 25.9557500,
-      houm: {
-        siteKey: "my_site_key"
-      },
       init: ({log, time, sun, houm, sensors, motion, R, B}) => {
         const nightTimeP = time.hourOfDayP.map((hours) => hours <= 6 || hours >= 21);
         nightTimeP.log("nighttime");
