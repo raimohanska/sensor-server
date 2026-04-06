@@ -76,25 +76,34 @@ function init(mqttConfig) {
     //   {"state": "ON", "brightness": 128}
     //   {"state": "OFF"}
     tcp.deviceConnectedE.filter(id => id === deviceId).onValue(() => {
-      log("MQTT subscribe " + commandTopic)
-      client.subscribe(commandTopic)  
+      client.subscribe(commandTopic)
+      // Subscribe for initial state only
+      client.subscribe(stateTopic)
     })
 
     tcp.deviceDisconnectedE.filter(id => id === deviceId).onValue(() => {
-      log("MQTT unsubscribe " + commandTopic)
-      client.unsubscribe(commandTopic)  
+      client.unsubscribe(commandTopic)
+      client.unsubscribe(stateTopic)
     })
     
     client.on('message', function(topic, message) {
-      if (topic === commandTopic) {
         const str = message.toString()
+      if (topic === commandTopic) {
+        parseAndApplyState()
+        client.publish(stateTopic, str, { retain: true })
+      } else if (topic === stateTopic) {
+        // Get initial state for device
+        parseAndApplyState()
+        client.unsubscribe(stateTopic)
+      }
+
+      function parseAndApplyState() {
         const msg = JSON.parse(str)
         const brightness = msg.state === "OFF" ? 0 : msg.brightness !== undefined ? msg.brightness : 255
         log("MQTT received light state for TCP device " + deviceId + " brightness=" + brightness)
         tcp.sendBrightnessToDevice(deviceId, properties, brightness)
-        client.publish(stateTopic, str)
       }
-    })
+    })    
   }
 }
 
