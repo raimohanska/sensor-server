@@ -77,15 +77,19 @@ function init(mqttConfig) {
   function publishLightDiscovery(device, properties) {
     const commandTopic = 'lights/' + device + '/set'
     const stateTopic = 'lights/' + device + '/brightness'
+    const availabilityTopic = 'lights/' + device + '/availability'
     const name = properties.name || device
     const payload = {
+      unique_id: device + '_light',
       schema: 'json',
       name,
       state_topic: stateTopic,
       brightness: true,
       brightness_scale: 255,
       command_topic: commandTopic,
-      unique_id: device + '_light',
+      availability_topic: availabilityTopic,
+      payload_available: 'online',
+      payload_not_available: 'offline',
       device: {
         identifiers: [device],
         name: device
@@ -94,7 +98,7 @@ function init(mqttConfig) {
     }
     client.publish('homeassistant/light/' + device + '/config', JSON.stringify(payload), { retain: true })
     log("MQTT publish light discovery", 'homeassistant/light/' + device + '/config', JSON.stringify(payload))
-    return { commandTopic, stateTopic }
+    return { commandTopic, stateTopic, availabilityTopic }
   }
 
 
@@ -126,19 +130,26 @@ function init(mqttConfig) {
   }
 
   function publishMqttLight(deviceId, properties) {
-    const { commandTopic, stateTopic } = publishLightDiscovery(deviceId, properties)
+    const { commandTopic, stateTopic, availabilityTopic } = publishLightDiscovery(deviceId, properties)
+    const isIntertechno = properties.intertechnoId
     const onConnect = () => {
       client.subscribe(commandTopic)
       // Subscribe for initial state only
       client.subscribe(stateTopic)
+      if (!isIntertechno) {
+        client.publish(availabilityTopic, "online")
+      }
     }
 
     const onDisconnect = () => {
       client.unsubscribe(commandTopic)
       client.unsubscribe(stateTopic)
+      if (!isIntertechno) {
+        client.publish(availabilityTopic, "offline")
+      }
     }
 
-    const light = properties.intertechnoId 
+    const light = isIntertechno
       ? IntertechnoLight(deviceId, properties, onConnect, onDisconnect) 
       : TCPLight(deviceId, properties, onConnect, onDisconnect)
 
