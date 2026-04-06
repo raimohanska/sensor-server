@@ -1,8 +1,6 @@
 const log = require("./log");
-const R=require("ramda");
 const B=require("baconjs");
 const time=require("./time");
-const Influx=require("influx");
 const mock = require("./mock");
 
 var https = require("https");
@@ -12,8 +10,6 @@ const initSite = function(site) {
   let store;
   const config = site.config.influx;
   if (config && !mock) {
-    const client = new Influx.InfluxDB(config);
-
     log("Connecting to InfluxDB at " + config.protocol + "://" + config.host + ":" + config.port + "/" + config.database);
     const eventBus = B.Bus();
       
