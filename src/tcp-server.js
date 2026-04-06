@@ -64,6 +64,8 @@ messageFromDeviceE
       if (message.value != null) {
         site.sensors.pushEvent(message);
       }
+    } else {
+      console.warn("No site found for TCP device message", message)
     }
 });
 

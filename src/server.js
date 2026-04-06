@@ -23,6 +23,7 @@ const mail = require("./mail");
 const sourcing = require("./sourcing-client");
 const sun = require("./sun");
 const intertechno = require("./intertechno");
+const S2M = require("./sensor-to-mqtt.js")
 
 siteConfigs.forEach(function(...args) {
   const [siteId, siteConfig] = Array.from(args[0]);
@@ -55,6 +56,8 @@ siteConfigs.forEach(function(...args) {
     .repeatBy(site.sensors.sourceHash, time.oneHour, { throttle: time.oneSecond, maxRepeat: time.oneDay})
     .onValue(site.influx.store);
 
+  sensorE.onValue(S2M.sendToMqtt)
+  
   sensorE
     .onError(error => log("ERROR: " + error));
 
