@@ -30,7 +30,19 @@ function publishDiscovery(nodeId, stateTopic, type) {
   if (unit) payload.unit_of_measurement = unit
 
   client.publish('homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
-  log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
+  log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload))
+}
+
+function publishLightDiscovery(device) {
+  const payload = {
+    name: device,
+    state_topic: 'sensors/' + device + '/brightness',
+    brightness_state_topic: 'sensors/' + device + '/brightness',
+    brightness_scale: 255,
+    unique_id: device + '_light'
+  }
+  client.publish('homeassistant/light/' + device + '/config', JSON.stringify(payload), { retain: true })
+  log("MQTT publish light discovery", 'homeassistant/light/' + device + '/config', JSON.stringify(payload))
 }
 
 const SUPPORTED_TYPES = ["temperature", "motion"]
@@ -53,4 +65,9 @@ function sendToMqtt(event) {
   client.publish(stateTopic, String(value))
 }
 
-module.exports = { init, sendToMqtt }
+function publishMqttLight(device) {
+  if (!client) return
+  publishLightDiscovery(device)
+}
+
+module.exports = { init, sendToMqtt, publishMqttLight }
