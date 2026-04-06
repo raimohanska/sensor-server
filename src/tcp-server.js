@@ -11,7 +11,8 @@ const scale = require('./scale');
 
 const addSocketE = B.Bus();
 const removeSocketE = B.Bus();
-removeSocketE.map(".id").forEach(log, "TCP device disconnected");
+const deviceDisconnectedE = removeSocketE.map(".id")
+deviceDisconnectedE.forEach(log, "TCP device disconnected");
 const messageFromDeviceE = B.Bus();
 
 const deviceConnectedE = addSocketE.map(".id");
@@ -91,4 +92,4 @@ const sendBrightnessToDevice = function(deviceId, properties, bri) {
   return sendToDevice(deviceId)(mappedState);
 };
 
-module.exports = { devicesP, deviceConnectedE, sendToDevice, sendBrightnessToDevice, messageFromDeviceE };
+module.exports = { devicesP, deviceConnectedE, deviceDisconnectedE, sendToDevice, sendBrightnessToDevice, messageFromDeviceE };

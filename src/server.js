@@ -54,13 +54,13 @@ siteConfigs.forEach(function(...args) {
     .onValue(site.influx.store);
 
   if (siteConfig.mqtt) {
-    S2M.init(siteConfig.mqtt)
+    const { sendToMqtt, publishMqttLight } = S2M.init(siteConfig.mqtt)
     Object.entries(siteConfig.devices).forEach(([deviceId, deviceConfig]) => {
       if (deviceConfig.properties.lightId) {
-        S2M.publishMqttLight(deviceId, deviceConfig.properties)
+        publishMqttLight(deviceId, deviceConfig.properties)
       }      
     })
-    sensorE.onValue(S2M.sendToMqtt)
+    sensorE.onValue(sendToMqtt)
   }  
   
   sensorE
