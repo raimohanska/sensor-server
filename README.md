@@ -64,15 +64,20 @@ houm.controlLight("fountain", fountainP);
 
 Further documentaion missing.
 
-### Install
+### Development
 
 Install
 
     npm install
 
-Create the file `config.js` in this  directory and add InfluxDB configuration there. Like in [example-config.js](src/example-config.js).
+Configuration
 
-You can omit any of the `influx` and `propertyMapping` sections if you don't need one of them.
+- You can start with using the example configuration
+- If you want to create a custom config, create the file `config.js` in this directory and add InfluxDB configuration there. Like in [example-config.js](src/example-config.js).
+
+Start local MQTT broker
+
+    docker-compose up -d
 
 Then run:
 

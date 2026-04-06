@@ -12,6 +12,11 @@ module.exports = {
         bucket: "default",
       },
       */
+      mqtt: {
+        brokerUrl: "mqtt://localhost:1883",
+        username: "",
+        password: ""
+      },
       devices: {
         "sensor1": {
           properties: { location: "livingroom" }

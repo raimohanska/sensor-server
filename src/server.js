@@ -56,7 +56,10 @@ siteConfigs.forEach(function(...args) {
     .repeatBy(site.sensors.sourceHash, time.oneHour, { throttle: time.oneSecond, maxRepeat: time.oneDay})
     .onValue(site.influx.store);
 
-  sensorE.onValue(S2M.sendToMqtt)
+  if (siteConfig.mqtt) {
+    S2M.init(siteConfig.mqtt)
+    sensorE.onValue(S2M.sendToMqtt)
+  }  
   
   sensorE
     .onError(error => log("ERROR: " + error));
