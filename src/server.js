@@ -10,7 +10,6 @@ const time = require("./time");
 log("Starting");
 const B=require("baconjs");
 require("./bacon-extensions");
-const HttpServer = require("./http-server");
 const influx = require("./influx-store");
 const config = require("./read-config");
 const sensors = require("./sensors");
@@ -20,7 +19,6 @@ const sites = require("./sites");
 const motion = require("./motion");
 const siteConfigs = R.toPairs(config.sites);
 const mail = require("./mail");
-const sourcing = require("./sourcing-client");
 const sun = require("./sun");
 const intertechno = require("./intertechno");
 const S2M = require("./sensor-to-mqtt.js")
@@ -45,8 +43,7 @@ siteConfigs.forEach(function(...args) {
   site.motion = motion.initSite(site);
   site.influx = influx.initSite(site);
   site.intertechno = intertechno.initSite(site);
-  HttpServer.initSite(site);
-
+  
   sites.registerSite(siteId, site);
 
   const {
@@ -63,8 +60,6 @@ siteConfigs.forEach(function(...args) {
   
   sensorE
     .onError(error => log("ERROR: " + error));
-
-  sourcing.initSite(site);
 
   if (siteConfig.init) {
     return siteConfig.init(site);
