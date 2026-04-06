@@ -36,18 +36,20 @@ function publishDiscovery(nodeId, stateTopic, type) {
 
 function publishLightDiscovery(device) {
   const commandTopic = 'lights/' + device + '/set'
+  const stateTopic = 'lights/' + device + '/brightness'
   const payload = {
     schema: 'json',
     name: device,
-    state_topic: 'sensors/' + device + '/brightness',
-    brightness_state_topic: 'sensors/' + device + '/brightness',
+    state_topic: stateTopic,
+    brightness: true,
     brightness_scale: 255,
     command_topic: commandTopic,
-    unique_id: device + '_light'
+    unique_id: device + '_light',
+    retain: true,
   }
   client.publish('homeassistant/light/' + device + '/config', JSON.stringify(payload), { retain: true })
   log("MQTT publish light discovery", 'homeassistant/light/' + device + '/config', JSON.stringify(payload))
-  return { commandTopic }
+  return { commandTopic, stateTopic }
 }
 
 const SUPPORTED_TYPES = ["temperature", "motion"]
@@ -72,17 +74,19 @@ function sendToMqtt(event) {
 
 function publishMqttLight(deviceId, properties) {
   if (!client) return
-  const { commandTopic } = publishLightDiscovery(deviceId)
+  const { commandTopic, stateTopic } = publishLightDiscovery(deviceId)
   // Expected message on commandTopic (JSON schema):
   //   {"state": "ON", "brightness": 128}
   //   {"state": "OFF"}
   client.subscribe(commandTopic)
   client.on('message', function(topic, message) {
     if (topic === commandTopic) {
-      const msg = JSON.parse(message.toString())
+      const str = message.toString()
+      const msg = JSON.parse(str)
       const brightness = msg.state === "OFF" ? 0 : msg.brightness !== undefined ? msg.brightness : 255
       log("MQTT received light state for TCP device " + deviceId + " brightness=" + brightness)
       tcp.sendBrightnessToDevice(deviceId, properties, brightness)
+      client.publish(stateTopic, str)
     }
   })
 }
