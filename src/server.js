@@ -56,7 +56,7 @@ siteConfigs.forEach(function(...args) {
   if (siteConfig.mqtt) {
     const { sendSensorEventToMqtt, publishMqttLight } = S2M.init(siteConfig.mqtt)
     Object.entries(siteConfig.devices).forEach(([deviceId, deviceConfig]) => {
-      if (deviceConfig.properties.lightId) {
+      if (deviceConfig.properties && deviceConfig.properties.lightId) {
         publishMqttLight(deviceId, deviceConfig.properties)
       }      
     })
