@@ -115,10 +115,19 @@ function init(mqttConfig) {
   function IntertechnoLight(deviceId, properties, onConnect, onDisconnect) {
     log("MQTT init Intertechno light", deviceId)
     onConnect()
+    let timeout = null
     return {
       setBrightness(brightness) {
         log("MQTT received light state for Intertechno device " + deviceId + " brightness=" + brightness)
-        intertechno.sendIntertechnoState(properties.intertechnoId, brightness > 0)
+        const sendIt = () => {
+          log("MQTT send brightness to Intertechno device " + deviceId + " brightness=" + brightness)
+          intertechno.sendIntertechnoState(properties.intertechnoId, brightness > 0)
+          if (timeout) clearTimeout(timeout)
+          // Re-send each 10 minutes for extra reliability
+          timeout = setTimeout(sendIt, 10 * 60000)
+        }
+        // Some randomness to avoid conflict
+        setTimeout(sendIt, Math.random() * 5000)
       },
     }
   }
