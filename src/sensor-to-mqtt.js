@@ -115,11 +115,6 @@ function init(mqttConfig) {
   function IntertechnoLight(deviceId, properties, onConnect, onDisconnect) {
     log("MQTT init Intertechno light", deviceId)
     onConnect()
-    setInterval(() => {
-      // Request re-transmit each minute
-      onDisconnect()
-      setTimeout(onConnect, 1000)
-    }, time.oneMinute * 1)
     return {
       setBrightness(brightness) {
         log("MQTT received light state for Intertechno device " + deviceId + " brightness=" + brightness)
@@ -130,18 +125,20 @@ function init(mqttConfig) {
 
   function publishMqttLight(deviceId, properties) {
     const { commandTopic, stateTopic, availabilityTopic } = publishLightDiscovery(deviceId, properties)
-    const isIntertechno = properties.intertechnoId
+    const isIntertechno = properties.intertechnoId !== undefined
     const onConnect = () => {
       client.subscribe(commandTopic)
       // Subscribe for initial state only
       client.subscribe(stateTopic)      
       client.publish(availabilityTopic, "online", { retain: true })      
+      log("MQTT publish light available", deviceId)
     }
 
     const onDisconnect = () => {
       client.unsubscribe(commandTopic)
       client.unsubscribe(stateTopic)
       client.publish(availabilityTopic, "offline", { retain: true })      
+      log("MQTT publish light unavailable", deviceId)
     }
 
     const light = isIntertechno
