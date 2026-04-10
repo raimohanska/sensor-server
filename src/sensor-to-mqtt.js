@@ -17,8 +17,6 @@ const SENSOR_TYPES = {
   illumination: {
     discoveryTopicPrefix: "sensor",
     discoveryPayload: {
-      device_class: "illuminance",
-      unit_of_measurement: "raw"
     },
     mapValue(value) {
       return String(value * 100)
