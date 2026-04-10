@@ -149,19 +149,29 @@ function init(mqttConfig) {
   function publishMqttLight(deviceId, properties) {
     const { commandTopic, stateTopic, availabilityTopic } = publishLightDiscovery(deviceId, properties)
     const isIntertechno = properties.intertechnoId !== undefined
+    
+    // Use counter, because a new connection may come in before the previous one was disconnected
+    let connectCount = 0
+
     const onConnect = () => {
+      connectCount++
       client.subscribe(commandTopic)
       // Subscribe for initial state only
-      client.subscribe(stateTopic)      
-      client.publish(availabilityTopic, "online", { retain: true })      
-      log("MQTT publish light available", deviceId)
+      client.subscribe(stateTopic)
+      if (connectCount === 1) {
+        client.publish(availabilityTopic, "online", { retain: true })      
+        log("MQTT publish light available", deviceId)
+      }
     }
 
     const onDisconnect = () => {
-      client.unsubscribe(commandTopic)
-      client.unsubscribe(stateTopic)
-      client.publish(availabilityTopic, "offline", { retain: true })      
-      log("MQTT publish light unavailable", deviceId)
+      connectCount--
+      if (connectCount === 0) {
+        client.unsubscribe(commandTopic)
+        client.unsubscribe(stateTopic)
+        client.publish(availabilityTopic, "offline", { retain: true })      
+        log("MQTT publish light unavailable", deviceId)
+      }      
     }
 
     const light = isIntertechno
