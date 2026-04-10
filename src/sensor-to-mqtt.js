@@ -1,12 +1,12 @@
 const mqtt = require('mqtt')
 const log = require("./log")
 const tcp = require("./tcp-server")
-const time = require("./time")
 const intertechno = require("./intertechno")
 
 const SENSOR_TYPES = {
   temperature: {
-    discovery: {
+    discoveryTopicPrefix: "sensor",
+    discoveryPayload: {
       device_class: "temperature",
       unit_of_measurement: '°C'
     },
@@ -15,7 +15,8 @@ const SENSOR_TYPES = {
     }
   },
   motion: {
-    discovery: {
+    discoveryTopicPrefix: "binary_sensor",
+    discoveryPayload: {
       device_class: 'motion',
       payload_on: 'ON',
       payload_off: 'OFF',      
@@ -47,10 +48,12 @@ function init(mqttConfig) {
         identifiers: [device],
         name
       },
-      ...SENSOR_TYPES[type].discovery
+      ...SENSOR_TYPES[type].discoveryPayload
     }
 
-    client.publish('homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
+    const prefix = SENSOR_TYPES[type].discoveryTopicPrefix
+
+    client.publish('homeassistant/' + prefix + '/' + nodeId + '/config', JSON.stringify(payload), { retain: true })
     log("MQTT publish discovery", 'homeassistant/sensor/' + nodeId + '/config', JSON.stringify(payload))
   }
 
