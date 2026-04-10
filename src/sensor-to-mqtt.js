@@ -79,13 +79,14 @@ function init(mqttConfig) {
     const stateTopic = 'lights/' + device + '/brightness'
     const availabilityTopic = 'lights/' + device + '/availability'
     const name = properties.name || device
+    const dimmable = !properties.intertechnoId && properties.dimmable !== false
     const payload = {
       unique_id: device + '_light',
       schema: 'json',
       name,
       state_topic: stateTopic,
-      brightness: true,
-      brightness_scale: 255,
+      brightness: dimmable,
+      ...(dimmable && { brightness_scale: 255 }),
       command_topic: commandTopic,
       availability_topic: availabilityTopic,
       payload_available: 'online',
@@ -112,7 +113,7 @@ function init(mqttConfig) {
     }
   }
 
-  function IntertechnoLight(deviceId, properties, onConnect, onDisconnect) {
+  function IntertechnoLight(deviceId, properties, onConnect) {
     log("MQTT init Intertechno light", deviceId)
     onConnect()
     let timeout = null
