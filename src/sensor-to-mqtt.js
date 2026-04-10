@@ -134,18 +134,14 @@ function init(mqttConfig) {
     const onConnect = () => {
       client.subscribe(commandTopic)
       // Subscribe for initial state only
-      client.subscribe(stateTopic)
-      if (!isIntertechno) {
-        client.publish(availabilityTopic, "online", { retain: true })
-      }
+      client.subscribe(stateTopic)      
+      client.publish(availabilityTopic, "online", { retain: true })      
     }
 
     const onDisconnect = () => {
       client.unsubscribe(commandTopic)
       client.unsubscribe(stateTopic)
-      if (!isIntertechno) {
-        client.publish(availabilityTopic, "offline", { retain: true })
-      }
+      client.publish(availabilityTopic, "offline", { retain: true })      
     }
 
     const light = isIntertechno
