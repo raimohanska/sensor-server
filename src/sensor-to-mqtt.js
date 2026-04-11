@@ -90,7 +90,7 @@ function init(mqttConfig) {
     const stateTopic = 'lights/' + device + '/brightness'
     const availabilityTopic = 'lights/' + device + '/availability'
     const name = properties.name || device
-    const dimmable = !properties.intertechnoId && properties.dimmable !== false
+    const dimmable = properties.intertechnoId == undefined && properties.dimmable !== false
     const payload = {
       unique_id: device + '_light',
       schema: 'json',
