@@ -136,10 +136,9 @@ function init(mqttConfig) {
           intertechno.sendIntertechnoState(properties.intertechnoId, brightness > 0)
           if (timeout) clearTimeout(timeout)
           // Re-send each 10 minutes for extra reliability
-          timeout = setTimeout(sendIt, 10 * 60000)
-        }
-        // Some randomness to avoid conflict
-        setTimeout(sendIt, Math.random() * 5000)
+          timeout = setTimeout(sendIt, 10 * 60000 + Math.random() * 5000)
+        }        
+        sendIt()
       },
     }
   }
